@@ -3,6 +3,9 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
+import { Button } from "@/components/ui/button";
+import { Separator } from "@/components/ui/separator";
+import { cn } from "@/lib/utils";
 import {
   FiHome,
   FiDollarSign,
@@ -32,32 +35,42 @@ export default function Sidebar() {
   return (
     <>
       {/* Mobile toggle */}
-      <button
+      <Button
+        variant="ghost"
+        size="icon"
         onClick={() => setOpen(!open)}
-        className="fixed top-4 left-4 z-50 rounded-lg bg-slate-800 p-2 text-white md:hidden"
+        className="fixed top-4 left-4 z-50 md:hidden bg-card border border-border"
       >
-        {open ? <FiX size={20} /> : <FiMenu size={20} />}
-      </button>
+        {open ? <FiX size={18} /> : <FiMenu size={18} />}
+      </Button>
 
       {/* Overlay */}
       {open && (
         <div
-          className="fixed inset-0 z-30 bg-black/50 md:hidden"
+          className="fixed inset-0 z-30 bg-black/60 md:hidden"
           onClick={() => setOpen(false)}
         />
       )}
 
       {/* Sidebar */}
       <aside
-        className={`fixed left-0 top-0 z-40 h-full w-64 bg-slate-900 text-white transition-transform duration-200 ${
-          open ? "translate-x-0" : "-translate-x-full"
-        } md:translate-x-0`}
+        className={cn(
+          "fixed left-0 top-0 z-40 h-full w-64 bg-sidebar text-sidebar-foreground border-r border-sidebar-border transition-transform duration-200",
+          open ? "translate-x-0" : "-translate-x-full md:translate-x-0"
+        )}
       >
-        <div className="flex h-16 items-center gap-2 border-b border-slate-700 px-6">
-          <span className="text-2xl font-bold text-emerald-400">MiCaja</span>
+        {/* Logo */}
+        <div className="flex h-16 items-center gap-3 px-6">
+          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-sidebar-primary">
+            <FiDollarSign size={16} className="text-sidebar-primary-foreground" />
+          </div>
+          <span className="text-xl font-bold tracking-tight">MiCaja</span>
         </div>
 
-        <nav className="mt-4 space-y-1 px-3">
+        <Separator className="bg-sidebar-border" />
+
+        {/* Nav */}
+        <nav className="mt-4 space-y-0.5 px-3">
           {navItems.map((item) => {
             const isActive =
               pathname === item.href ||
@@ -67,24 +80,26 @@ export default function Sidebar() {
                 key={item.href}
                 href={item.href}
                 onClick={() => setOpen(false)}
-                className={`flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors ${
+                className={cn(
+                  "flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors",
                   isActive
-                    ? "bg-emerald-600 text-white"
-                    : "text-slate-300 hover:bg-slate-800 hover:text-white"
-                }`}
+                    ? "bg-sidebar-accent text-sidebar-accent-foreground"
+                    : "text-sidebar-foreground/70 hover:bg-sidebar-accent/50 hover:text-sidebar-foreground"
+                )}
               >
-                <item.icon size={18} />
+                <item.icon size={16} className="shrink-0" />
                 {item.label}
               </Link>
             );
           })}
         </nav>
 
-        <div className="absolute bottom-4 left-0 right-0 px-6">
-          <div className="rounded-lg bg-slate-800 p-3 text-xs text-slate-400">
-            <p>Datos desde Google Sheets</p>
-            <p className="mt-1 text-slate-500">Fase 1 - MVP</p>
-          </div>
+        {/* Footer */}
+        <div className="absolute bottom-4 left-0 right-0 px-4">
+          <Separator className="mb-4 bg-sidebar-border" />
+          <p className="text-xs text-sidebar-foreground/40 text-center">
+            Sincronizado con Google Sheets
+          </p>
         </div>
       </aside>
     </>

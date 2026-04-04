@@ -17,7 +17,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="es" className={cn("h-full antialiased", "font-sans", geist.variable)}>
+    <html lang="es" className={cn("dark h-full antialiased", geist.variable)}>
       <body className="min-h-full">
         <Sidebar />
         <main className="min-h-screen md:ml-64">

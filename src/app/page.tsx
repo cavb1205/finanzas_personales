@@ -16,6 +16,17 @@ import {
 } from "@/lib/sheets";
 import { formatCLP, formatCOP, formatUSD, formatPercent } from "@/lib/format";
 import DashboardCharts from "./DashboardCharts";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Separator } from "@/components/ui/separator";
 
 export const revalidate = 300;
 
@@ -29,35 +40,18 @@ export default async function Dashboard() {
       getApartamento(),
     ]);
 
-  const chileTotalIngresos = chile.transactions.reduce(
-    (sum, t) => sum + t.ingreso,
-    0
-  );
-  const chileTotalGastos = chile.transactions.reduce(
-    (sum, t) => sum + t.gasto,
-    0
-  );
+  const chileTotalIngresos = chile.transactions.reduce((s, t) => s + t.ingreso, 0);
+  const chileTotalGastos = chile.transactions.reduce((s, t) => s + t.gasto, 0);
   const chileSaldo = chileTotalIngresos - chileTotalGastos;
 
-  const colombiaTotalIngresos = colombia.transactions.reduce(
-    (sum, t) => sum + t.ingreso,
-    0
-  );
-  const colombiaTotalGastos = colombia.transactions.reduce(
-    (sum, t) => sum + t.gasto,
-    0
-  );
+  const colombiaTotalIngresos = colombia.transactions.reduce((s, t) => s + t.ingreso, 0);
+  const colombiaTotalGastos = colombia.transactions.reduce((s, t) => s + t.gasto, 0);
   const colombiaSaldo = colombiaTotalIngresos - colombiaTotalGastos;
 
   const totalPendientePrestamos = prestamos.resumen.reduce(
-    (sum, p) => sum + p.saldoPendiente,
+    (s, p) => s + p.saldoPendiente,
     0
   );
-
-  const portafolioPercent = portafolio.resumen.gananciaPercent;
-  const portafolioTotal = portafolio.resumen.valorActual;
-  const portafolioInvertido = portafolio.resumen.inversionTotal;
-  const portafolioGanancia = portafolio.resumen.ganancia;
 
   const apartamentoPercent =
     apartamento.valorTotal > 0
@@ -65,103 +59,141 @@ export default async function Dashboard() {
       : 0;
 
   return (
-    <div>
-      <h1 className="mb-6 text-3xl font-bold text-white">Dashboard</h1>
+    <div className="space-y-8">
+      <div>
+        <h1 className="text-2xl font-bold tracking-tight">Dashboard</h1>
+        <p className="text-muted-foreground text-sm mt-1">
+          Resumen de tus finanzas en Chile, Colombia e inversiones
+        </p>
+      </div>
 
+      <Separator />
+
+      {/* Summary cards */}
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
         <DashboardCard
-          title="Caja Chile (CLP)"
+          title="Caja Chile"
           value={formatCLP(chileSaldo)}
-          subtitle={`Ingresos: ${formatCLP(chileTotalIngresos)} | Gastos: ${formatCLP(chileTotalGastos)}`}
-          icon={<FiDollarSign size={24} />}
+          subtitle={`↑ ${formatCLP(chileTotalIngresos)}  ↓ ${formatCLP(chileTotalGastos)}`}
+          icon={<FiDollarSign size={20} />}
           color={chileSaldo >= 0 ? "emerald" : "rose"}
         />
         <DashboardCard
-          title="Caja Colombia (COP)"
+          title="Caja Colombia"
           value={formatCOP(colombiaSaldo)}
-          subtitle={`Ingresos: ${formatCOP(colombiaTotalIngresos)} | Gastos: ${formatCOP(colombiaTotalGastos)}`}
-          icon={<FiGlobe size={24} />}
+          subtitle={`↑ ${formatCOP(colombiaTotalIngresos)}  ↓ ${formatCOP(colombiaTotalGastos)}`}
+          icon={<FiGlobe size={20} />}
           color={colombiaSaldo >= 0 ? "blue" : "rose"}
         />
         <DashboardCard
-          title="Portafolio (USD)"
-          value={formatUSD(portafolioTotal)}
-          subtitle={`Invertido: ${formatUSD(portafolioInvertido)} | ${formatPercent(portafolioPercent)}`}
-          icon={<FiTrendingUp size={24} />}
-          color={portafolioGanancia >= 0 ? "indigo" : "rose"}
+          title="Portafolio"
+          value={formatUSD(portafolio.resumen.valorActual)}
+          subtitle={`Invertido ${formatUSD(portafolio.resumen.inversionTotal)} · ${formatPercent(portafolio.resumen.gananciaPercent)}`}
+          icon={<FiTrendingUp size={20} />}
+          color={portafolio.resumen.ganancia >= 0 ? "indigo" : "rose"}
         />
         <DashboardCard
-          title="Préstamos Pendientes"
+          title="Préstamos pendientes"
           value={formatCOP(totalPendientePrestamos)}
-          subtitle={`${prestamos.resumen.filter((p) => p.saldoPendiente > 0).length} personas con saldo`}
-          icon={<FiUsers size={24} />}
+          subtitle={`${prestamos.resumen.filter((p) => p.saldoPendiente > 0).length} personas con saldo activo`}
+          icon={<FiUsers size={20} />}
           color="amber"
         />
         <DashboardCard
           title="Meta Apartamento"
           value={`${apartamentoPercent.toFixed(1)}%`}
           subtitle={`${formatCOP(apartamento.totalAportado)} de ${formatCOP(apartamento.valorTotal)}`}
-          icon={<FiTarget size={24} />}
+          icon={<FiTarget size={20} />}
           color="purple"
         />
         <DashboardCard
-          title="Inv. Busetas (COP)"
+          title="Inversión Busetas"
           value={formatCOP(colombia.investmentSummary.totalInvertido)}
-          subtitle={`Recuperado: ${formatCOP(colombia.investmentSummary.recuperado)} (${colombia.investmentSummary.porcentajeRecuperacion}%)`}
-          icon={<FiTruck size={24} />}
+          subtitle={`Recuperado ${formatCOP(colombia.investmentSummary.recuperado)} · ${colombia.investmentSummary.porcentajeRecuperacion.toFixed(2)}%`}
+          icon={<FiTruck size={20} />}
           color="blue"
         />
       </div>
 
-      <div className="mt-8">
-        <DashboardCharts summary={chile.summary} />
-      </div>
+      {/* Chart */}
+      <DashboardCharts summary={chile.summary} />
 
-      <div className="mt-8">
-        <h2 className="mb-4 text-xl font-semibold text-white">
-          Préstamos - Resumen
-        </h2>
-        <div className="overflow-x-auto rounded-xl border border-slate-700">
-          <table className="w-full text-sm">
-            <thead>
-              <tr className="border-b border-slate-700 bg-slate-800/50">
-                <th className="px-4 py-3 text-left text-xs font-medium uppercase text-slate-400">
-                  Persona
-                </th>
-                <th className="px-4 py-3 text-right text-xs font-medium uppercase text-slate-400">
-                  Deuda Total
-                </th>
-                <th className="px-4 py-3 text-right text-xs font-medium uppercase text-slate-400">
-                  Pagado
-                </th>
-                <th className="px-4 py-3 text-right text-xs font-medium uppercase text-slate-400">
-                  Pendiente
-                </th>
-              </tr>
-            </thead>
-            <tbody>
-              {prestamos.resumen.map((p) => (
-                <tr
-                  key={p.persona}
-                  className="border-b border-slate-800 hover:bg-slate-800/30"
-                >
-                  <td className="px-4 py-3 font-medium text-white">
-                    {p.persona}
-                  </td>
-                  <td className="px-4 py-3 text-right text-slate-300">
-                    {formatCOP(p.deudaTotal)}
-                  </td>
-                  <td className="px-4 py-3 text-right text-emerald-400">
-                    {formatCOP(p.totalPagado)}
-                  </td>
-                  <td className="px-4 py-3 text-right text-amber-400">
-                    {formatCOP(p.saldoPendiente)}
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+      {/* Préstamos + Portafolio resumen */}
+      <div className="grid gap-6 lg:grid-cols-2">
+        {/* Préstamos */}
+        <Card>
+          <CardHeader className="pb-3">
+            <CardTitle className="text-base">Préstamos</CardTitle>
+          </CardHeader>
+          <CardContent className="p-0">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Persona</TableHead>
+                  <TableHead className="text-right">Deuda</TableHead>
+                  <TableHead className="text-right">Pagado</TableHead>
+                  <TableHead className="text-right">Pendiente</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {prestamos.resumen.map((p) => (
+                  <TableRow key={p.persona}>
+                    <TableCell className="font-medium">{p.persona}</TableCell>
+                    <TableCell className="text-right font-mono text-xs text-muted-foreground">
+                      {formatCOP(p.deudaTotal)}
+                    </TableCell>
+                    <TableCell className="text-right font-mono text-xs text-emerald-400">
+                      {formatCOP(p.totalPagado)}
+                    </TableCell>
+                    <TableCell className="text-right font-mono text-xs">
+                      {p.saldoPendiente > 0 ? (
+                        <Badge variant="outline" className="border-amber-500/30 text-amber-400 font-mono text-xs">
+                          {formatCOP(p.saldoPendiente)}
+                        </Badge>
+                      ) : (
+                        <Badge variant="outline" className="border-emerald-500/30 text-emerald-400 text-xs">
+                          Saldado
+                        </Badge>
+                      )}
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </CardContent>
+        </Card>
+
+        {/* Portafolio resumen */}
+        <Card>
+          <CardHeader className="pb-3">
+            <CardTitle className="text-base">Portafolio por Activo</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            {(["GOOG", "BTC"] as const).map((etf) => {
+              const etfEntries = portafolio.entries.filter((e) => e.etf === etf);
+              const invertido = etfEntries.reduce((s, e) => s + e.inversionInicial, 0);
+              const actual = etfEntries.reduce((s, e) => s + e.valorActual, 0);
+              const ganancia = etfEntries.reduce((s, e) => s + e.ganancia, 0);
+              const pct = invertido > 0 ? (ganancia / invertido) * 100 : 0;
+              return (
+                <div key={etf} className="flex items-center justify-between">
+                  <div>
+                    <p className="font-medium text-sm">{etf}</p>
+                    <p className="text-xs text-muted-foreground font-mono">
+                      Invertido {formatUSD(invertido)}
+                    </p>
+                  </div>
+                  <div className="text-right">
+                    <p className="font-mono text-sm font-bold">{formatUSD(actual)}</p>
+                    <p className={`text-xs font-mono ${pct >= 0 ? "text-emerald-400" : "text-rose-400"}`}>
+                      {formatPercent(pct)}
+                    </p>
+                  </div>
+                </div>
+              );
+            })}
+          </CardContent>
+        </Card>
       </div>
     </div>
   );
