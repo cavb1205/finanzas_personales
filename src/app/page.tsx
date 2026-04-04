@@ -1,65 +1,168 @@
-import Image from "next/image";
+import {
+  FiDollarSign,
+  FiGlobe,
+  FiTrendingUp,
+  FiTarget,
+  FiUsers,
+  FiTruck,
+} from "react-icons/fi";
+import DashboardCard from "@/components/DashboardCard";
+import {
+  getCajaChile,
+  getCajaColombia,
+  getPrestamos,
+  getPortafolio,
+  getApartamento,
+} from "@/lib/sheets";
+import { formatCLP, formatCOP, formatUSD, formatPercent } from "@/lib/format";
+import DashboardCharts from "./DashboardCharts";
 
-export default function Home() {
+export const revalidate = 300;
+
+export default async function Dashboard() {
+  const [chile, colombia, prestamos, portafolio, apartamento] =
+    await Promise.all([
+      getCajaChile(),
+      getCajaColombia(),
+      getPrestamos(),
+      getPortafolio(),
+      getApartamento(),
+    ]);
+
+  const chileTotalIngresos = chile.transactions.reduce(
+    (sum, t) => sum + t.ingreso,
+    0
+  );
+  const chileTotalGastos = chile.transactions.reduce(
+    (sum, t) => sum + t.gasto,
+    0
+  );
+  const chileSaldo = chileTotalIngresos - chileTotalGastos;
+
+  const colombiaTotalIngresos = colombia.transactions.reduce(
+    (sum, t) => sum + t.ingreso,
+    0
+  );
+  const colombiaTotalGastos = colombia.transactions.reduce(
+    (sum, t) => sum + t.gasto,
+    0
+  );
+  const colombiaSaldo = colombiaTotalIngresos - colombiaTotalGastos;
+
+  const totalPendientePrestamos = prestamos.resumen.reduce(
+    (sum, p) => sum + p.saldoPendiente,
+    0
+  );
+
+  const portafolioPercent = portafolio.resumen.gananciaPercent;
+  const portafolioTotal = portafolio.resumen.valorActual;
+  const portafolioInvertido = portafolio.resumen.inversionTotal;
+  const portafolioGanancia = portafolio.resumen.ganancia;
+
+  const apartamentoPercent =
+    apartamento.valorTotal > 0
+      ? (apartamento.totalAportado / apartamento.valorTotal) * 100
+      : 0;
+
   return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
+    <div>
+      <h1 className="mb-6 text-3xl font-bold text-white">Dashboard</h1>
+
+      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        <DashboardCard
+          title="Caja Chile (CLP)"
+          value={formatCLP(chileSaldo)}
+          subtitle={`Ingresos: ${formatCLP(chileTotalIngresos)} | Gastos: ${formatCLP(chileTotalGastos)}`}
+          icon={<FiDollarSign size={24} />}
+          color={chileSaldo >= 0 ? "emerald" : "rose"}
         />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
+        <DashboardCard
+          title="Caja Colombia (COP)"
+          value={formatCOP(colombiaSaldo)}
+          subtitle={`Ingresos: ${formatCOP(colombiaTotalIngresos)} | Gastos: ${formatCOP(colombiaTotalGastos)}`}
+          icon={<FiGlobe size={24} />}
+          color={colombiaSaldo >= 0 ? "blue" : "rose"}
+        />
+        <DashboardCard
+          title="Portafolio (USD)"
+          value={formatUSD(portafolioTotal)}
+          subtitle={`Invertido: ${formatUSD(portafolioInvertido)} | ${formatPercent(portafolioPercent)}`}
+          icon={<FiTrendingUp size={24} />}
+          color={portafolioGanancia >= 0 ? "indigo" : "rose"}
+        />
+        <DashboardCard
+          title="Préstamos Pendientes"
+          value={formatCOP(totalPendientePrestamos)}
+          subtitle={`${prestamos.resumen.filter((p) => p.saldoPendiente > 0).length} personas con saldo`}
+          icon={<FiUsers size={24} />}
+          color="amber"
+        />
+        <DashboardCard
+          title="Meta Apartamento"
+          value={`${apartamentoPercent.toFixed(1)}%`}
+          subtitle={`${formatCOP(apartamento.totalAportado)} de ${formatCOP(apartamento.valorTotal)}`}
+          icon={<FiTarget size={24} />}
+          color="purple"
+        />
+        <DashboardCard
+          title="Inv. Busetas (COP)"
+          value={formatCOP(colombia.investmentSummary.totalInvertido)}
+          subtitle={`Recuperado: ${formatCOP(colombia.investmentSummary.recuperado)} (${colombia.investmentSummary.porcentajeRecuperacion}%)`}
+          icon={<FiTruck size={24} />}
+          color="blue"
+        />
+      </div>
+
+      <div className="mt-8">
+        <DashboardCharts summary={chile.summary} />
+      </div>
+
+      <div className="mt-8">
+        <h2 className="mb-4 text-xl font-semibold text-white">
+          Préstamos - Resumen
+        </h2>
+        <div className="overflow-x-auto rounded-xl border border-slate-700">
+          <table className="w-full text-sm">
+            <thead>
+              <tr className="border-b border-slate-700 bg-slate-800/50">
+                <th className="px-4 py-3 text-left text-xs font-medium uppercase text-slate-400">
+                  Persona
+                </th>
+                <th className="px-4 py-3 text-right text-xs font-medium uppercase text-slate-400">
+                  Deuda Total
+                </th>
+                <th className="px-4 py-3 text-right text-xs font-medium uppercase text-slate-400">
+                  Pagado
+                </th>
+                <th className="px-4 py-3 text-right text-xs font-medium uppercase text-slate-400">
+                  Pendiente
+                </th>
+              </tr>
+            </thead>
+            <tbody>
+              {prestamos.resumen.map((p) => (
+                <tr
+                  key={p.persona}
+                  className="border-b border-slate-800 hover:bg-slate-800/30"
+                >
+                  <td className="px-4 py-3 font-medium text-white">
+                    {p.persona}
+                  </td>
+                  <td className="px-4 py-3 text-right text-slate-300">
+                    {formatCOP(p.deudaTotal)}
+                  </td>
+                  <td className="px-4 py-3 text-right text-emerald-400">
+                    {formatCOP(p.totalPagado)}
+                  </td>
+                  <td className="px-4 py-3 text-right text-amber-400">
+                    {formatCOP(p.saldoPendiente)}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
         </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
-        </div>
-      </main>
+      </div>
     </div>
   );
 }
