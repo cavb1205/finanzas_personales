@@ -1,8 +1,8 @@
 "use client";
 
 import MonthlyChart from "@/components/MonthlyChart";
-import CategoryPieChart from "./CategoryPieChart";
-import SaldoAcumuladoChart from "./SaldoAcumuladoChart";
+import SaldoAcumuladoChart from "@/app/caja-chile/SaldoAcumuladoChart";
+import CategoryPieChart from "@/app/caja-chile/CategoryPieChart";
 import type { MonthlySummary, Transaction } from "@/lib/sheets";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
@@ -11,7 +11,7 @@ interface Props {
   transactions: Transaction[];
 }
 
-export default function CajaChileCharts({ summary, transactions }: Props) {
+export default function CajaColombiaCharts({ summary, transactions }: Props) {
   return (
     <Tabs defaultValue="mensual">
       <TabsList>

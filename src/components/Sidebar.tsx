@@ -16,10 +16,12 @@ import {
   FiTruck,
   FiMenu,
   FiX,
+  FiBarChart2,
 } from "react-icons/fi";
 
 const navItems = [
   { href: "/", label: "Dashboard", icon: FiHome },
+  { href: "/resumen", label: "Resumen Ejecutivo", icon: FiBarChart2 },
   { href: "/caja-chile", label: "Caja Chile", icon: FiDollarSign },
   { href: "/caja-colombia", label: "Caja Colombia", icon: FiGlobe },
   { href: "/portafolio", label: "Portafolio", icon: FiTrendingUp },

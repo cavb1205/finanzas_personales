@@ -214,6 +214,7 @@ export async function getCajaChile(): Promise<{
 
 export async function getCajaColombia(): Promise<{
   transactions: Transaction[];
+  summary: MonthlySummary[];
   investmentSummary: {
     totalInvertido: number;
     recuperado: number;
@@ -226,6 +227,7 @@ export async function getCajaColombia(): Promise<{
   if (rows.length < 2)
     return {
       transactions: [],
+      summary: [],
       investmentSummary: {
         totalInvertido: 0,
         recuperado: 0,
@@ -281,8 +283,49 @@ export async function getCajaColombia(): Promise<{
     (a, b) => parseDateToSortKey(b.fecha) - parseDateToSortKey(a.fecha)
   );
 
+  // Build monthly summary from transactions
+  // Colombia dates may be "DD/MM" (no year) — infer current year
+  const currentYear = new Date().getFullYear();
+  const monthMap = new Map<string, { ingresos: number; gastos: number }>();
+  for (const t of transactions) {
+    const sep = t.fecha.includes("/") ? "/" : "-";
+    const parts = t.fecha.split(sep);
+    let mm: string, yyyy: string;
+    if (parts.length === 2) {
+      // DD/MM — no year, infer current year
+      [, mm] = parts;
+      yyyy = String(currentYear);
+    } else if (parts.length === 3) {
+      if (parts[0].length === 4) {
+        [yyyy, mm] = parts;
+      } else {
+        [, mm, yyyy] = parts;
+      }
+    } else {
+      continue;
+    }
+    if (!mm || !yyyy) continue;
+    const key = `${yyyy}-${mm.padStart(2, "0")}`;
+    const entry = monthMap.get(key) ?? { ingresos: 0, gastos: 0 };
+    entry.ingresos += t.ingreso;
+    entry.gastos += t.gasto;
+    monthMap.set(key, entry);
+  }
+  const summary: MonthlySummary[] = Array.from(monthMap.entries())
+    .sort(([a], [b]) => a.localeCompare(b))
+    .map(([key, { ingresos, gastos }]) => {
+      const [yyyy, mm] = key.split("-");
+      const date = new Date(Number(yyyy), Number(mm) - 1, 1);
+      const month = date.toLocaleDateString("es-CO", {
+        month: "long",
+        year: "numeric",
+      });
+      return { month, ingresos, gastos, saldo: ingresos - gastos };
+    });
+
   return {
     transactions,
+    summary,
     investmentSummary: {
       totalInvertido,
       recuperado,

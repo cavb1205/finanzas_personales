@@ -16,6 +16,7 @@ import {
 } from "@/lib/sheets";
 import { formatCLP, formatCOP, formatUSD, formatPercent } from "@/lib/format";
 import DashboardCharts from "./DashboardCharts";
+import PatrimonioNeto from "./PatrimonioNeto";
 import {
   Table,
   TableBody,
@@ -57,6 +58,36 @@ export default async function Dashboard() {
     apartamento.valorTotal > 0
       ? (apartamento.totalAportado / apartamento.valorTotal) * 100
       : 0;
+
+  // Patrimonio neto — activos y pasivos por moneda
+  const activosCLP = [
+    { label: "Saldo Caja Chile", valor: formatCLP(chileSaldo) },
+  ];
+  const activosCOP = [
+    { label: "Saldo Caja Colombia", valor: formatCOP(colombiaSaldo) },
+    { label: "Portafolio (USD equiv.)", valor: formatUSD(portafolio.resumen.valorActual) },
+  ];
+  const pasivosCOP = [
+    {
+      label: "Préstamos pendientes",
+      valor: formatCOP(totalPendientePrestamos),
+    },
+    {
+      label: "Deuda apartamento",
+      valor: formatCOP(apartamento.saldoPendiente),
+    },
+  ];
+
+  const activos = [...activosCLP, ...activosCOP];
+  const pasivos = pasivosCOP;
+
+  // Tasa de ahorro — último mes con datos en summary Chile
+  const lastMonthSummary = chile.summary[chile.summary.length - 1] ?? null;
+  const tasaAhorro =
+    lastMonthSummary && lastMonthSummary.ingresos > 0
+      ? (lastMonthSummary.saldo / lastMonthSummary.ingresos) * 100
+      : null;
+  const mesLabel = lastMonthSummary?.month ?? "";
 
   return (
     <div className="space-y-8">
@@ -114,6 +145,21 @@ export default async function Dashboard() {
           color="blue"
         />
       </div>
+
+      <Separator />
+
+      {/* Patrimonio neto + tasa de ahorro */}
+      <div>
+        <h2 className="text-lg font-semibold mb-4">Estado Financiero</h2>
+        <PatrimonioNeto
+          activos={activos}
+          pasivos={pasivos}
+          tasaAhorro={tasaAhorro}
+          mesLabel={mesLabel}
+        />
+      </div>
+
+      <Separator />
 
       {/* Chart */}
       <DashboardCharts summary={chile.summary} />

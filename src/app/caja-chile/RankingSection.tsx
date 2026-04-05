@@ -2,7 +2,7 @@
 
 import { useState, useMemo } from "react";
 import type { Transaction } from "@/lib/sheets";
-import { formatCLP } from "@/lib/format";
+import { formatCLP, formatCOP } from "@/lib/format";
 import TopRanking from "@/components/TopRanking";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
@@ -14,10 +14,24 @@ import {
 } from "@/components/ui/select";
 
 function parseMonthKey(fecha: string): string {
-  // "d/MM/yyyy" → "yyyy-MM"
-  const parts = fecha.split("/");
-  if (parts.length !== 3) return "";
-  const [, mm, yyyy] = parts;
+  const currentYear = new Date().getFullYear();
+  const sep = fecha.includes("/") ? "/" : "-";
+  const parts = fecha.split(sep);
+  let mm: string, yyyy: string;
+  if (parts.length === 2) {
+    // DD/MM — no year
+    [, mm] = parts;
+    yyyy = String(currentYear);
+  } else if (parts.length === 3) {
+    if (parts[0].length === 4) {
+      [yyyy, mm] = parts;
+    } else {
+      [, mm, yyyy] = parts;
+    }
+  } else {
+    return "";
+  }
+  if (!mm || !yyyy) return "";
   return `${yyyy}-${mm.padStart(2, "0")}`;
 }
 
@@ -28,7 +42,11 @@ function monthLabel(key: string): string {
   return date.toLocaleDateString("es-CL", { month: "long", year: "numeric" });
 }
 
-function buildRanking(transactions: Transaction[], type: "gasto" | "ingreso") {
+function buildRanking(
+  transactions: Transaction[],
+  type: "gasto" | "ingreso",
+  format: (v: number) => string
+) {
   const map = new Map<string, number>();
   for (const t of transactions) {
     const value = type === "gasto" ? t.gasto : t.ingreso;
@@ -39,14 +57,17 @@ function buildRanking(transactions: Transaction[], type: "gasto" | "ingreso") {
   return Array.from(map.entries())
     .sort((a, b) => b[1] - a[1])
     .slice(0, 10)
-    .map(([label, value]) => ({ label, value, formatted: formatCLP(value) }));
+    .map(([label, value]) => ({ label, value, formatted: format(value) }));
 }
 
 export default function RankingSection({
   transactions,
+  currency = "CLP",
 }: {
   transactions: Transaction[];
+  currency?: "CLP" | "COP";
 }) {
+  const format = currency === "COP" ? formatCOP : formatCLP;
   // Build sorted list of unique months
   const months = useMemo(() => {
     const keys = new Set<string>();
@@ -71,14 +92,14 @@ export default function RankingSection({
     [transactions, selectedMonth]
   );
 
-  const topGastos = useMemo(() => buildRanking(filtered, "gasto"), [filtered]);
-  const topIngresos = useMemo(() => buildRanking(filtered, "ingreso"), [filtered]);
+  const topGastos = useMemo(() => buildRanking(filtered, "gasto", format), [filtered, format]);
+  const topIngresos = useMemo(() => buildRanking(filtered, "ingreso", format), [filtered, format]);
 
   return (
     <div className="space-y-4">
       <div className="flex items-center gap-3">
         <h2 className="text-lg font-semibold">Distribución por mes</h2>
-        <Select value={selectedMonth} onValueChange={setSelectedMonth}>
+        <Select value={selectedMonth} onValueChange={(v) => v && setSelectedMonth(v)}>
           <SelectTrigger className="w-44">
             <SelectValue />
           </SelectTrigger>
