@@ -10,6 +10,7 @@ import { formatCLP, formatCOP, formatUSD, formatPercent } from "@/lib/format";
 import { Separator } from "@/components/ui/separator";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
+import ResumenCharts from "./ResumenCharts";
 
 export const revalidate = 300;
 
@@ -292,6 +293,16 @@ export default async function ResumenPage() {
           </CardContent>
         </Card>
       </div>
+
+      {/* Gráficos */}
+      {chile.summary.length > 0 && (
+        <div className="space-y-3">
+          <h2 className="text-lg font-semibold">Evolución financiera</h2>
+          <ResumenCharts chileSum={chile.summary} />
+        </div>
+      )}
+
+      <Separator />
 
       {/* Activos vs Pasivos summary */}
       <Card>

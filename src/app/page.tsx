@@ -140,13 +140,15 @@ export default async function Dashboard() {
           icon={<FiTarget size={20} />}
           color="purple"
         />
-        <DashboardCard
-          title="Inversión Busetas"
-          value={formatCOP(colombia.investmentSummary.totalInvertido)}
-          subtitle={`Recuperado ${formatCOP(colombia.investmentSummary.recuperado)} · ${colombia.investmentSummary.porcentajeRecuperacion.toFixed(2)}%`}
-          icon={<FiTruck size={20} />}
-          color="blue"
-        />
+        {colombia.investmentSummary.totalInvertido > 0 && (
+          <DashboardCard
+            title="Inversión Busetas"
+            value={formatCOP(colombia.investmentSummary.totalInvertido)}
+            subtitle={`Recuperado ${formatCOP(colombia.investmentSummary.recuperado)} · ${colombia.investmentSummary.porcentajeRecuperacion.toFixed(2)}%`}
+            icon={<FiTruck size={20} />}
+            color="blue"
+          />
+        )}
       </div>
 
       <Separator />

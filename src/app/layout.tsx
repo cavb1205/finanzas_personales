@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Sidebar from "@/components/Sidebar";
+import { ThemeProvider } from "@/components/ThemeProvider";
 import "./globals.css";
 import { Geist } from "next/font/google";
 import { cn } from "@/lib/utils";
@@ -23,12 +24,14 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="es" className={cn("dark h-full antialiased", geist.variable)}>
+    <html lang="es" className={cn("h-full antialiased", geist.variable)} suppressHydrationWarning>
       <body className="min-h-full">
-        <Sidebar />
-        <main className="min-h-screen md:ml-64">
-          <div className="p-4 pt-16 md:p-8 md:pt-8">{children}</div>
-        </main>
+        <ThemeProvider attribute="class" defaultTheme="dark" enableSystem={false}>
+          <Sidebar />
+          <main className="min-h-screen md:ml-64">
+            <div className="p-4 pt-16 md:p-8 md:pt-8">{children}</div>
+          </main>
+        </ThemeProvider>
       </body>
     </html>
   );

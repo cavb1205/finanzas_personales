@@ -5,7 +5,8 @@ const SYMBOLS: Record<string, string> = {
   BTC: "BTC-USD",
 };
 
-export const revalidate = 300; // cache 5 min
+// Route handler revalidate must be a literal — matches REVALIDATE_SECONDS in src/lib/config.ts
+export const revalidate = 300;
 
 export async function GET() {
   try {

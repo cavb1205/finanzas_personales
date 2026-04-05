@@ -11,6 +11,7 @@ import {
 } from "chart.js";
 import { Bar } from "react-chartjs-2";
 import type { MonthlySummary } from "@/lib/sheets";
+import { formatCLP, formatCOP } from "@/lib/format";
 
 ChartJS.register(
   CategoryScale,
@@ -24,9 +25,11 @@ ChartJS.register(
 interface Props {
   data: MonthlySummary[];
   title?: string;
+  currency?: "CLP" | "COP";
 }
 
-export default function MonthlyChart({ data, title = "Resumen Mensual" }: Props) {
+export default function MonthlyChart({ data, title = "Resumen Mensual", currency = "CLP" }: Props) {
+  const fmt = currency === "COP" ? formatCOP : formatCLP;
   const chartData = {
     labels: data.map((d) => d.month),
     datasets: [
@@ -58,6 +61,12 @@ export default function MonthlyChart({ data, title = "Resumen Mensual" }: Props)
         color: "#e2e8f0",
         font: { size: 16 },
       },
+      tooltip: {
+        callbacks: {
+          label: (ctx: { dataset: { label?: string }; raw: unknown }) =>
+            ` ${ctx.dataset.label}: ${fmt(ctx.raw as number)}`,
+        },
+      },
     },
     scales: {
       x: {
@@ -65,7 +74,10 @@ export default function MonthlyChart({ data, title = "Resumen Mensual" }: Props)
         grid: { color: "rgba(51, 65, 85, 0.3)" },
       },
       y: {
-        ticks: { color: "#64748b" },
+        ticks: {
+          color: "#64748b",
+          callback: (v: unknown) => fmt(v as number),
+        },
         grid: { color: "rgba(51, 65, 85, 0.3)" },
       },
     },

@@ -9,6 +9,7 @@ import { cn } from "@/lib/utils";
 import PortafolioTable from "./PortafolioTable";
 import PortafolioCharts from "./PortafolioCharts";
 import LivePrices from "./LivePrices";
+import PriceHistoryChart from "./PriceHistoryChart";
 
 export const revalidate = 300;
 
@@ -82,6 +83,9 @@ export default async function PortafolioPage() {
       </div>
 
       {/* Per-asset cards */}
+      <p className="text-xs text-muted-foreground -mt-4">
+        Valores calculados con el precio registrado en Google Sheets. Los precios en tiempo real aparecen más abajo.
+      </p>
       <div className="grid gap-4 sm:grid-cols-2">
         {Array.from(byEtf.entries()).map(([etf, data]) => {
           const weight =
@@ -180,8 +184,9 @@ export default async function PortafolioPage() {
           <TabsTrigger value="graficos">Gráficos</TabsTrigger>
           <TabsTrigger value="posiciones">Posiciones</TabsTrigger>
         </TabsList>
-        <TabsContent value="graficos" className="mt-6">
+        <TabsContent value="graficos" className="mt-6 space-y-8">
           <PortafolioCharts entries={entries} />
+          <PriceHistoryChart />
         </TabsContent>
         <TabsContent value="posiciones" className="mt-6 space-y-3">
           <h2 className="text-lg font-semibold">Posiciones</h2>

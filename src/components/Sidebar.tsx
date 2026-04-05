@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { cn } from "@/lib/utils";
 import SyncIndicator from "@/components/SyncIndicator";
+import ThemeToggle from "@/components/ThemeToggle";
 import {
   FiHome,
   FiDollarSign,
@@ -102,9 +103,15 @@ export default function Sidebar() {
         {/* Footer */}
         <div className="absolute bottom-4 left-0 right-0 px-4">
           <Separator className="mb-4 bg-sidebar-border" />
-          <div className="flex flex-col items-center gap-1">
-            <p className="text-xs text-sidebar-foreground/40">Google Sheets</p>
-            <SyncIndicator />
+          <div className="flex items-center justify-between">
+            <div className="flex flex-col gap-0.5">
+              <p className="text-xs text-sidebar-foreground/40">Google Sheets</p>
+              <SyncIndicator />
+            </div>
+            <div className="flex flex-col items-end gap-0.5">
+              <ThemeToggle />
+              <span className="text-xs text-sidebar-foreground/30 font-mono">v0.1.0</span>
+            </div>
           </div>
         </div>
       </aside>

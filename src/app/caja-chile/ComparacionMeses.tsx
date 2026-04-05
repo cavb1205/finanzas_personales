@@ -24,25 +24,33 @@ function Delta({ current, previous }: { current: number; previous: number }) {
   );
 }
 
+type RowType = "ingreso" | "gasto" | "saldo";
+
+function rowColor(type: RowType, value: number): string {
+  if (type === "ingreso") return "text-emerald-400";
+  if (type === "gasto") return "text-rose-400";
+  // saldo: verde si >= 0, rojo si negativo
+  return value >= 0 ? "text-emerald-400" : "text-rose-400";
+}
+
 function Row({
   label,
   a,
   b,
-  invert,
+  type,
 }: {
   label: string;
   a: number;
   b: number;
-  invert?: boolean; // for gastos: higher = worse
+  type: RowType;
 }) {
-  const better = invert ? a <= b : a >= b;
   return (
     <div className="grid grid-cols-4 items-center py-2.5 border-b border-border last:border-0 gap-2">
       <span className="text-sm text-muted-foreground col-span-1">{label}</span>
-      <span className={cn("font-mono text-sm font-semibold text-right", better ? "text-emerald-400" : "text-rose-400")}>
+      <span className={cn("font-mono text-sm font-semibold text-right", rowColor(type, a))}>
         {formatCLP(a)}
       </span>
-      <span className={cn("font-mono text-sm font-semibold text-right", !better ? "text-emerald-400" : "text-rose-400")}>
+      <span className={cn("font-mono text-sm font-semibold text-right", rowColor(type, b))}>
         {formatCLP(b)}
       </span>
       <div className="text-right">
@@ -106,9 +114,9 @@ export default function ComparacionMeses({ summary }: Props) {
               <span className="text-xs text-muted-foreground text-right font-medium">{mesB}</span>
               <span className="text-xs text-muted-foreground text-right">Δ A vs B</span>
             </div>
-            <Row label="Ingresos" a={dataA.ingresos} b={dataB.ingresos} />
-            <Row label="Gastos"   a={dataA.gastos}   b={dataB.gastos}   invert />
-            <Row label="Saldo"    a={dataA.saldo}    b={dataB.saldo}    />
+            <Row label="Ingresos" a={dataA.ingresos} b={dataB.ingresos} type="ingreso" />
+            <Row label="Gastos"   a={dataA.gastos}   b={dataB.gastos}   type="gasto" />
+            <Row label="Saldo"    a={dataA.saldo}    b={dataB.saldo}    type="saldo" />
           </>
         ) : (
           <p className="text-sm text-muted-foreground">Selecciona dos meses para comparar.</p>

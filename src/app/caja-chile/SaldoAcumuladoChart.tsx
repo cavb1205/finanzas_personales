@@ -13,7 +13,7 @@ import {
 } from "chart.js";
 import { Line } from "react-chartjs-2";
 import type { MonthlySummary } from "@/lib/sheets";
-import { formatCLP } from "@/lib/format";
+import { formatCLP, formatCOP } from "@/lib/format";
 
 ChartJS.register(
   CategoryScale,
@@ -28,9 +28,11 @@ ChartJS.register(
 
 interface Props {
   summary: MonthlySummary[];
+  currency?: "CLP" | "COP";
 }
 
-export default function SaldoAcumuladoChart({ summary }: Props) {
+export default function SaldoAcumuladoChart({ summary, currency = "CLP" }: Props) {
+  const fmt = currency === "COP" ? formatCOP : formatCLP;
   if (summary.length === 0) return null;
 
   let acum = 0;
@@ -75,7 +77,7 @@ export default function SaldoAcumuladoChart({ summary }: Props) {
       },
       tooltip: {
         callbacks: {
-          label: (ctx: { raw: unknown }) => ` ${formatCLP(ctx.raw as number)}`,
+          label: (ctx: { raw: unknown }) => ` ${fmt(ctx.raw as number)}`,
         },
       },
     },
@@ -87,7 +89,7 @@ export default function SaldoAcumuladoChart({ summary }: Props) {
       y: {
         ticks: {
           color: "#64748b",
-          callback: (v: unknown) => formatCLP(v as number),
+          callback: (v: unknown) => fmt(v as number),
         },
         grid: { color: "rgba(51, 65, 85, 0.3)" },
       },

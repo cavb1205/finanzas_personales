@@ -5,19 +5,10 @@ import type { Transaction } from "@/lib/sheets";
 import { formatCLP, formatCOP } from "@/lib/format";
 import { Input } from "@/components/ui/input";
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
+  Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from "@/components/ui/select";
 import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
+  Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
 } from "@/components/ui/table";
 import { cn } from "@/lib/utils";
 import { usePagination } from "@/hooks/usePagination";
@@ -31,13 +22,38 @@ interface Props {
 }
 
 const categoryVariant: Record<string, string> = {
-  ingreso: "bg-emerald-500/15 text-emerald-400 border-emerald-500/20",
-  gasto: "bg-rose-500/15 text-rose-400 border-rose-500/20",
+  ingreso:  "bg-emerald-500/15 text-emerald-400 border-emerald-500/20",
+  gasto:    "bg-rose-500/15 text-rose-400 border-rose-500/20",
   préstamo: "bg-amber-500/15 text-amber-400 border-amber-500/20",
   prestamo: "bg-amber-500/15 text-amber-400 border-amber-500/20",
-  inversión: "bg-blue-500/15 text-blue-400 border-blue-500/20",
-  inversion: "bg-blue-500/15 text-blue-400 border-blue-500/20",
+  inversión:"bg-blue-500/15 text-blue-400 border-blue-500/20",
+  inversion:"bg-blue-500/15 text-blue-400 border-blue-500/20",
 };
+
+/** Returns "yyyy-MM" from any supported date string, or "" */
+function toMonthKey(fecha: string): string {
+  const sep = fecha.includes("/") ? "/" : "-";
+  const parts = fecha.split(sep);
+  const currentYear = new Date().getFullYear();
+  let mm: string, yyyy: string;
+  if (parts.length === 2) {
+    [, mm] = parts;
+    yyyy = String(currentYear);
+  } else if (parts.length === 3) {
+    if (parts[0].length === 4) { [yyyy, mm] = parts; }
+    else { [, mm, yyyy] = parts; }
+  } else {
+    return "";
+  }
+  if (!mm || !yyyy) return "";
+  return `${yyyy}-${mm.padStart(2, "0")}`;
+}
+
+function monthLabel(key: string): string {
+  const [yyyy, mm] = key.split("-");
+  const d = new Date(Number(yyyy), Number(mm) - 1, 1);
+  return d.toLocaleDateString("es-CL", { month: "long", year: "numeric" });
+}
 
 export default function TransactionTable({
   transactions,
@@ -46,31 +62,37 @@ export default function TransactionTable({
 }: Props) {
   const [search, setSearch] = useState("");
   const [categoryFilter, setCategoryFilter] = useState("all");
-  const handleCategoryChange = (value: string | null) =>
-    setCategoryFilter(value ?? "all");
+  const [monthFilter, setMonthFilter] = useState("all");
 
   const format = currency === "CLP" ? formatCLP : formatCOP;
 
   const categories = useMemo(
-    () =>
-      Array.from(new Set(transactions.map((t) => t.categoria.toLowerCase()))).filter(
-        Boolean
-      ),
+    () => Array.from(new Set(transactions.map((t) => t.categoria.toLowerCase()))).filter(Boolean),
     [transactions]
   );
 
+  // Build sorted list of available months
+  const months = useMemo(() => {
+    const keys = new Set<string>();
+    for (const t of transactions) {
+      const k = toMonthKey(t.fecha);
+      if (k) keys.add(k);
+    }
+    return Array.from(keys).sort().reverse();
+  }, [transactions]);
+
   const filtered = useMemo(
-    () =>
-      transactions.filter((t) => {
-        const matchesText =
-          t.descripcion.toLowerCase().includes(search.toLowerCase()) ||
-          t.fecha.includes(search);
-        const matchesCategory =
-          categoryFilter === "all" ||
-          t.categoria.toLowerCase() === categoryFilter;
-        return matchesText && matchesCategory;
-      }),
-    [transactions, search, categoryFilter]
+    () => transactions.filter((t) => {
+      const matchesText =
+        t.descripcion.toLowerCase().includes(search.toLowerCase()) ||
+        t.fecha.includes(search);
+      const matchesCategory =
+        categoryFilter === "all" || t.categoria.toLowerCase() === categoryFilter;
+      const matchesMonth =
+        monthFilter === "all" || toMonthKey(t.fecha) === monthFilter;
+      return matchesText && matchesCategory && matchesMonth;
+    }),
+    [transactions, search, categoryFilter, monthFilter]
   );
 
   const { page, totalPages, paginated, goTo } = usePagination(filtered, pageSize);
@@ -82,24 +104,26 @@ export default function TransactionTable({
   return (
     <div className="space-y-4">
       {/* Filters */}
-      <div className="flex flex-col gap-3 sm:flex-row">
+      <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap">
         <Input
           placeholder="Buscar descripción o fecha..."
           value={search}
-          onChange={(e) => {
-            setSearch(e.target.value);
-            goTo(1);
-          }}
+          onChange={(e) => { setSearch(e.target.value); goTo(1); }}
           className="sm:max-w-xs"
         />
-        <Select
-          value={categoryFilter}
-          onValueChange={(v) => {
-            handleCategoryChange(v);
-            goTo(1);
-          }}
-        >
-          <SelectTrigger className="sm:w-48">
+        <Select value={monthFilter} onValueChange={(v) => { if (v) { setMonthFilter(v); goTo(1); } }}>
+          <SelectTrigger className="sm:w-44">
+            <SelectValue placeholder="Mes" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">Todos los meses</SelectItem>
+            {months.map((m) => (
+              <SelectItem key={m} value={m}>{monthLabel(m)}</SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+        <Select value={categoryFilter} onValueChange={(v) => { if (v) { setCategoryFilter(v); goTo(1); } }}>
+          <SelectTrigger className="sm:w-44">
             <SelectValue placeholder="Categoría" />
           </SelectTrigger>
           <SelectContent>
@@ -111,7 +135,21 @@ export default function TransactionTable({
             ))}
           </SelectContent>
         </Select>
+        {(monthFilter !== "all" || categoryFilter !== "all" || search) && (
+          <button
+            onClick={() => { setSearch(""); setCategoryFilter("all"); setMonthFilter("all"); goTo(1); }}
+            className="text-xs text-muted-foreground hover:text-foreground underline underline-offset-2 self-center"
+          >
+            Limpiar filtros
+          </button>
+        )}
       </div>
+
+      {/* Count */}
+      <p className="text-xs text-muted-foreground">
+        {filtered.length} transacci{filtered.length === 1 ? "ón" : "ones"}
+        {filtered.length !== transactions.length && ` de ${transactions.length}`}
+      </p>
 
       {/* Table */}
       <div className="rounded-lg border border-border overflow-hidden">
@@ -142,13 +180,10 @@ export default function TransactionTable({
                     {t.fecha}
                   </TableCell>
                   <TableCell>
-                    <span
-                      className={cn(
-                        "inline-flex items-center rounded-full border px-2 py-0.5 text-xs font-medium",
-                        categoryVariant[t.categoria.toLowerCase()] ??
-                          "bg-muted text-muted-foreground border-border"
-                      )}
-                    >
+                    <span className={cn(
+                      "inline-flex items-center rounded-full border px-2 py-0.5 text-xs font-medium",
+                      categoryVariant[t.categoria.toLowerCase()] ?? "bg-muted text-muted-foreground border-border"
+                    )}>
                       {t.categoria}
                     </span>
                   </TableCell>
@@ -166,7 +201,6 @@ export default function TransactionTable({
         </Table>
       </div>
 
-      {/* Pagination */}
       <PaginationControls
         page={page}
         totalPages={totalPages}

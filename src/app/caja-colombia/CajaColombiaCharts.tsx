@@ -20,10 +20,10 @@ export default function CajaColombiaCharts({ summary, transactions }: Props) {
         <TabsTrigger value="categorias">Categorías</TabsTrigger>
       </TabsList>
       <TabsContent value="mensual" className="mt-4">
-        <MonthlyChart data={summary} title="Ingresos vs Gastos por Mes" />
+        <MonthlyChart data={summary} title="Ingresos vs Gastos por Mes" currency="COP" />
       </TabsContent>
       <TabsContent value="acumulado" className="mt-4">
-        <SaldoAcumuladoChart summary={summary} />
+        <SaldoAcumuladoChart summary={summary} currency="COP" />
       </TabsContent>
       <TabsContent value="categorias" className="mt-4">
         <CategoryPieChart transactions={transactions} />
