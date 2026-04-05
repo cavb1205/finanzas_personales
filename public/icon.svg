@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" fill="none">
+  <!-- Background rounded square -->
+  <rect width="32" height="32" rx="8" fill="#0f172a"/>
+
+  <!-- Wallet body -->
+  <rect x="5" y="11" width="22" height="14" rx="2.5" fill="#1e293b" stroke="#334155" stroke-width="1"/>
+
+  <!-- Wallet flap / top fold -->
+  <path d="M7 11 C7 8.5 9 7 11 7 L21 7 C23 7 25 8.5 25 11" stroke="#334155" stroke-width="1" fill="#1e293b"/>
+
+  <!-- Card slot accent -->
+  <rect x="17" y="15" width="7" height="6" rx="1.5" fill="#1d4ed8" opacity="0.9"/>
+
+  <!-- Coin circle on card -->
+  <circle cx="20.5" cy="18" r="1.8" fill="#3b82f6" opacity="0.95"/>
+
+  <!-- Dollar sign -->
+  <text x="20.5" y="18.65" text-anchor="middle" font-family="Arial, sans-serif" font-size="2.4" font-weight="bold" fill="#ffffff">$</text>
+
+  <!-- Left lines (transaction lines) -->
+  <rect x="7" y="15.5" width="7" height="1.2" rx="0.6" fill="#475569"/>
+  <rect x="7" y="18.5" width="5" height="1.2" rx="0.6" fill="#334155"/>
+</svg>
