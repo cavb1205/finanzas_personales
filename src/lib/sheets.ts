@@ -1,17 +1,20 @@
 import { google } from "googleapis";
 
-const auth = new google.auth.GoogleAuth({
-  credentials: {
-    client_email: process.env.GOOGLE_SERVICE_ACCOUNT_EMAIL,
-    private_key: process.env.GOOGLE_PRIVATE_KEY?.replace(/\\n/g, "\n"),
-  },
-  scopes: ["https://www.googleapis.com/auth/spreadsheets.readonly"],
-});
-
-const sheets = google.sheets({ version: "v4", auth });
-const SHEET_ID = process.env.GOOGLE_SHEET_ID!;
+function getSheets() {
+  const auth = new google.auth.GoogleAuth({
+    credentials: {
+      client_email: process.env.GOOGLE_SERVICE_ACCOUNT_EMAIL,
+      private_key: process.env.GOOGLE_PRIVATE_KEY?.replace(/\\n/g, "\n"),
+    },
+    scopes: ["https://www.googleapis.com/auth/spreadsheets.readonly"],
+  });
+  return google.sheets({ version: "v4", auth });
+}
 
 export async function getSheetData(sheetName: string, range?: string) {
+  const SHEET_ID = process.env.GOOGLE_SHEET_ID;
+  if (!SHEET_ID) throw new Error("GOOGLE_SHEET_ID env var is not set");
+  const sheets = getSheets();
   const fullRange = range ? `'${sheetName}'!${range}` : `'${sheetName}'`;
   const response = await sheets.spreadsheets.values.get({
     spreadsheetId: SHEET_ID,
