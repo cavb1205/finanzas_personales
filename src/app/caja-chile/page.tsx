@@ -1,6 +1,7 @@
 import { FiDollarSign, FiTrendingUp, FiTrendingDown } from "react-icons/fi";
 import DashboardCard from "@/components/DashboardCard";
 import TransactionTable from "@/components/TransactionTable";
+import RankingSection from "./RankingSection";
 import { getCajaChile } from "@/lib/sheets";
 import { formatCLP } from "@/lib/format";
 import { Separator } from "@/components/ui/separator";
@@ -19,7 +20,9 @@ export default async function CajaChilePage() {
     <div className="space-y-8">
       <div>
         <h1 className="text-2xl font-bold tracking-tight">Caja Chile</h1>
-        <p className="text-muted-foreground text-sm mt-1">Ingresos y gastos en pesos chilenos</p>
+        <p className="text-muted-foreground text-sm mt-1">
+          Ingresos y gastos en pesos chilenos
+        </p>
       </div>
 
       <Separator />
@@ -46,6 +49,8 @@ export default async function CajaChilePage() {
       </div>
 
       <CajaChileCharts summary={summary} />
+
+      <RankingSection transactions={transactions} />
 
       <div className="space-y-3">
         <h2 className="text-lg font-semibold">Transacciones</h2>
