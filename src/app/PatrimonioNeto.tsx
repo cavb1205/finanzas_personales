@@ -1,6 +1,10 @@
 "use client";
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Tooltip, TooltipContent, TooltipProvider, TooltipTrigger,
+} from "@/components/ui/tooltip";
+import { FiInfo } from "react-icons/fi";
 import { cn } from "@/lib/utils";
 
 interface Linea {
@@ -69,8 +73,18 @@ export default function PatrimonioNeto({
       {/* Tasa de ahorro */}
       <Card className="border-blue-500/20">
         <CardHeader className="pb-3">
-          <CardTitle className="text-sm font-medium text-muted-foreground uppercase tracking-wide">
+          <CardTitle className="text-sm font-medium text-muted-foreground uppercase tracking-wide flex items-center gap-1.5">
             Tasa de Ahorro
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger className="text-muted-foreground/50 hover:text-muted-foreground cursor-default">
+                  <FiInfo size={12} />
+                </TooltipTrigger>
+                <TooltipContent>
+                  (Ingresos − Gastos) / Ingresos × 100. Meta recomendada: ≥20%.
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
           </CardTitle>
         </CardHeader>
         <CardContent className="flex flex-col items-center justify-center h-[calc(100%-4rem)] gap-2">

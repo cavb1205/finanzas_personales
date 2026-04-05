@@ -22,6 +22,7 @@ import {
 import { cn } from "@/lib/utils";
 import { usePagination } from "@/hooks/usePagination";
 import PaginationControls from "@/components/PaginationControls";
+import EmptyState from "@/components/EmptyState";
 
 interface Props {
   transactions: Transaction[];
@@ -74,6 +75,10 @@ export default function TransactionTable({
 
   const { page, totalPages, paginated, goTo } = usePagination(filtered, pageSize);
 
+  if (transactions.length === 0) {
+    return <EmptyState title="Sin transacciones" description="No se encontraron transacciones en este módulo." />;
+  }
+
   return (
     <div className="space-y-4">
       {/* Filters */}
@@ -123,11 +128,11 @@ export default function TransactionTable({
           <TableBody>
             {paginated.length === 0 ? (
               <TableRow>
-                <TableCell
-                  colSpan={5}
-                  className="text-center text-muted-foreground py-10"
-                >
-                  No se encontraron transacciones
+                <TableCell colSpan={5} className="py-0">
+                  <EmptyState
+                    title="Sin resultados"
+                    description="Ninguna transacción coincide con los filtros aplicados."
+                  />
                 </TableCell>
               </TableRow>
             ) : (

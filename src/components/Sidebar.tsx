@@ -6,6 +6,7 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { cn } from "@/lib/utils";
+import SyncIndicator from "@/components/SyncIndicator";
 import {
   FiHome,
   FiDollarSign,
@@ -17,6 +18,7 @@ import {
   FiMenu,
   FiX,
   FiBarChart2,
+  FiBox,
 } from "react-icons/fi";
 
 const navItems = [
@@ -24,6 +26,7 @@ const navItems = [
   { href: "/resumen", label: "Resumen Ejecutivo", icon: FiBarChart2 },
   { href: "/caja-chile", label: "Caja Chile", icon: FiDollarSign },
   { href: "/caja-colombia", label: "Caja Colombia", icon: FiGlobe },
+  { href: "/cuadre-caja", label: "Cuadre de Caja", icon: FiBox },
   { href: "/portafolio", label: "Portafolio", icon: FiTrendingUp },
   { href: "/prestamos", label: "Préstamos", icon: FiUsers },
   { href: "/metas", label: "Metas", icon: FiTarget },
@@ -99,9 +102,10 @@ export default function Sidebar() {
         {/* Footer */}
         <div className="absolute bottom-4 left-0 right-0 px-4">
           <Separator className="mb-4 bg-sidebar-border" />
-          <p className="text-xs text-sidebar-foreground/40 text-center">
-            Sincronizado con Google Sheets
-          </p>
+          <div className="flex flex-col items-center gap-1">
+            <p className="text-xs text-sidebar-foreground/40">Google Sheets</p>
+            <SyncIndicator />
+          </div>
         </div>
       </aside>
     </>

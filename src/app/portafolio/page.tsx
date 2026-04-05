@@ -8,6 +8,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { cn } from "@/lib/utils";
 import PortafolioTable from "./PortafolioTable";
 import PortafolioCharts from "./PortafolioCharts";
+import LivePrices from "./LivePrices";
 
 export const revalidate = 300;
 
@@ -171,6 +172,8 @@ export default async function PortafolioPage() {
           );
         })}
       </div>
+
+      <LivePrices entries={entries} />
 
       <Tabs defaultValue="graficos">
         <TabsList>

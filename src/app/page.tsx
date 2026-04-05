@@ -106,6 +106,7 @@ export default async function Dashboard() {
           title="Caja Chile"
           value={formatCLP(chileSaldo)}
           subtitle={`↑ ${formatCLP(chileTotalIngresos)}  ↓ ${formatCLP(chileTotalGastos)}`}
+          tooltip="Saldo neto acumulado de todas las transacciones en pesos chilenos"
           icon={<FiDollarSign size={20} />}
           color={chileSaldo >= 0 ? "emerald" : "rose"}
         />
@@ -120,6 +121,7 @@ export default async function Dashboard() {
           title="Portafolio"
           value={formatUSD(portafolio.resumen.valorActual)}
           subtitle={`Invertido ${formatUSD(portafolio.resumen.inversionTotal)} · ${formatPercent(portafolio.resumen.gananciaPercent)}`}
+          tooltip="Valor de mercado actual del portafolio de inversiones (GOOG + BTC) en dólares"
           icon={<FiTrendingUp size={20} />}
           color={portafolio.resumen.ganancia >= 0 ? "indigo" : "rose"}
         />
@@ -127,6 +129,7 @@ export default async function Dashboard() {
           title="Préstamos pendientes"
           value={formatCOP(totalPendientePrestamos)}
           subtitle={`${prestamos.resumen.filter((p) => p.saldoPendiente > 0).length} personas con saldo activo`}
+          tooltip="Suma total de saldos pendientes de cobro a todas las personas"
           icon={<FiUsers size={20} />}
           color="amber"
         />

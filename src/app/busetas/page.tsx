@@ -1,11 +1,13 @@
-import { FiTruck, FiUsers, FiDollarSign, FiTrendingUp } from "react-icons/fi";
+import { FiTruck, FiUsers, FiDollarSign, FiTrendingUp, FiTrendingDown } from "react-icons/fi";
 import DashboardCard from "@/components/DashboardCard";
 import { getControlBusetas, getDashboardBusetas } from "@/lib/sheets";
 import { formatCOP, formatNumber, formatPercent } from "@/lib/format";
 import { Separator } from "@/components/ui/separator";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { cn } from "@/lib/utils";
 import BusetasTable from "./BusetasTable";
+import BusetasCharts from "./BusetasCharts";
+import EmptyState from "@/components/EmptyState";
 
 export const revalidate = 300;
 
@@ -21,11 +23,32 @@ export default async function BusetasPage() {
   const totalPasajeros = entries.reduce((s, e) => s + e.pasajeros, 0);
   const totalViajes = entries.filter((e) => e.brutoTotal > 0).length;
 
+  // Margen operativo
+  const margen = totalBruto > 0 ? (totalNeto / totalBruto) * 100 : 0;
+
+  if (entries.length === 0 && dashboard.monthly.length === 0) {
+    return (
+      <div className="space-y-8">
+        <div>
+          <h1 className="text-2xl font-bold tracking-tight">Control Busetas</h1>
+          <p className="text-muted-foreground text-sm mt-1">Operación diaria del negocio de transporte</p>
+        </div>
+        <Separator />
+        <EmptyState
+          title="Sin datos de busetas"
+          description="No hay registros de viajes disponibles en este momento."
+        />
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-8">
       <div>
         <h1 className="text-2xl font-bold tracking-tight">Control Busetas</h1>
-        <p className="text-muted-foreground text-sm mt-1">Operación diaria del negocio de transporte</p>
+        <p className="text-muted-foreground text-sm mt-1">
+          Operación diaria del negocio de transporte
+        </p>
       </div>
 
       <Separator />
@@ -34,19 +57,25 @@ export default async function BusetasPage() {
         <DashboardCard
           title="Ingreso Bruto"
           value={formatCOP(totalBruto)}
-          subtitle={`${totalViajes} viajes`}
+          subtitle={`${totalViajes} viajes registrados`}
           icon={<FiDollarSign size={20} />}
           color="blue"
         />
         <DashboardCard
           title="Total Gastos"
           value={formatCOP(totalGastos)}
-          icon={<FiTruck size={20} />}
+          subtitle={`${margen >= 0 ? "Margen " + margen.toFixed(1) + "%" : "Margen negativo"}`}
+          icon={<FiTrendingDown size={20} />}
           color="rose"
         />
         <DashboardCard
           title="Neto"
           value={formatCOP(totalNeto)}
+          subtitle={
+            dashboard.crecimiento !== 0
+              ? `${formatPercent(dashboard.crecimiento)} vs mes anterior`
+              : undefined
+          }
           icon={<FiTrendingUp size={20} />}
           color={totalNeto >= 0 ? "emerald" : "rose"}
         />
@@ -59,47 +88,44 @@ export default async function BusetasPage() {
         />
       </div>
 
-      {/* Monthly dashboard */}
-      {dashboard.monthly.length > 0 && (
-        <div className="grid gap-4 sm:grid-cols-3">
-          {dashboard.monthly.map((m) => (
-            <Card key={m.month}>
-              <CardHeader className="pb-2">
-                <CardTitle className="text-sm text-muted-foreground">{m.month}</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-1">
-                <div className="flex justify-between text-sm">
-                  <span className="text-muted-foreground">Bruto</span>
-                  <span className="font-mono text-xs">{formatCOP(m.bruto)}</span>
-                </div>
-                <div className="flex justify-between text-sm">
-                  <span className="text-muted-foreground">Gastos</span>
-                  <span className="font-mono text-xs text-rose-400">{formatCOP(m.gastos)}</span>
-                </div>
-                <div className="flex justify-between text-sm font-semibold">
-                  <span>Neto</span>
-                  <span className={cn("font-mono text-sm", m.neto >= 0 ? "text-emerald-400" : "text-rose-400")}>
-                    {formatCOP(m.neto)}
-                  </span>
-                </div>
-              </CardContent>
-            </Card>
-          ))}
+      {/* Mes anterior vs actual */}
+      {(dashboard.gananciaAnterior > 0 || dashboard.gananciaActual > 0) && (
+        <div className="grid gap-4 sm:grid-cols-2">
+          <div className="rounded-lg border border-border bg-muted/20 p-4 space-y-1">
+            <p className="text-xs text-muted-foreground uppercase tracking-wide">Ganancia mes anterior</p>
+            <p className="text-2xl font-bold font-mono text-foreground">
+              {formatCOP(dashboard.gananciaAnterior)}
+            </p>
+          </div>
+          <div className="rounded-lg border border-border bg-muted/20 p-4 space-y-1">
+            <p className="text-xs text-muted-foreground uppercase tracking-wide">Ganancia mes actual</p>
+            <p className={cn("text-2xl font-bold font-mono", dashboard.crecimiento >= 0 ? "text-emerald-400" : "text-rose-400")}>
+              {formatCOP(dashboard.gananciaActual)}
+            </p>
+            {dashboard.crecimiento !== 0 && (
+              <p className={cn("text-xs font-mono", dashboard.crecimiento >= 0 ? "text-emerald-400" : "text-rose-400")}>
+                {formatPercent(dashboard.crecimiento)} vs mes anterior
+              </p>
+            )}
+          </div>
         </div>
       )}
 
-      {dashboard.monthly.length > 0 && (
-        <div className="flex items-center gap-4 text-sm text-muted-foreground">
-          <span>Mes anterior: <span className="font-mono text-foreground">{formatCOP(dashboard.gananciaAnterior)}</span></span>
-          <span>Mes actual: <span className="font-mono text-foreground">{formatCOP(dashboard.gananciaActual)}</span></span>
-          <span>Crecimiento: <span className={cn("font-mono", dashboard.crecimiento >= 0 ? "text-emerald-400" : "text-rose-400")}>{formatPercent(dashboard.crecimiento)}</span></span>
-        </div>
-      )}
+      <Tabs defaultValue="graficos">
+        <TabsList>
+          <TabsTrigger value="graficos">Gráficos</TabsTrigger>
+          <TabsTrigger value="viajes">Detalle Viajes</TabsTrigger>
+        </TabsList>
 
-      <div className="space-y-3">
-        <h2 className="text-lg font-semibold">Detalle de Viajes</h2>
-        <BusetasTable entries={entries} />
-      </div>
+        <TabsContent value="graficos" className="mt-6">
+          <BusetasCharts monthly={dashboard.monthly} gastos={dashboard.gastos} />
+        </TabsContent>
+
+        <TabsContent value="viajes" className="mt-6 space-y-3">
+          <h2 className="text-lg font-semibold">Detalle de Viajes</h2>
+          <BusetasTable entries={entries} />
+        </TabsContent>
+      </Tabs>
     </div>
   );
 }

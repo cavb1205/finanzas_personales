@@ -21,12 +21,17 @@ import {
 import { cn } from "@/lib/utils";
 import { usePagination } from "@/hooks/usePagination";
 import PaginationControls from "@/components/PaginationControls";
+import EmptyState from "@/components/EmptyState";
 
 export default function PortafolioTable({
   entries,
 }: {
   entries: InvestmentEntry[];
 }) {
+  if (entries.length === 0) {
+    return <EmptyState title="Sin posiciones" description="No hay entradas de portafolio registradas." />;
+  }
+
   const [filterEtf, setFilterEtf] = useState<string>("all");
   const handleEtfChange = (value: string | null) =>
     setFilterEtf(value ?? "all");
