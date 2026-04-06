@@ -3,12 +3,10 @@ import DashboardCard from "@/components/DashboardCard";
 import { getPortafolio } from "@/lib/sheets";
 import { formatUSD, formatPercent } from "@/lib/format";
 import { Separator } from "@/components/ui/separator";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { cn } from "@/lib/utils";
 import PortafolioTable from "./PortafolioTable";
 import PortafolioCharts from "./PortafolioCharts";
-import LivePrices from "./LivePrices";
+import PortafolioAssets from "./PortafolioAssets";
 import PriceHistoryChart from "./PriceHistoryChart";
 
 export const revalidate = 300;
@@ -16,30 +14,13 @@ export const revalidate = 300;
 export default async function PortafolioPage() {
   const { entries, resumen } = await getPortafolio();
 
-  const byEtf = new Map<
-    string,
-    { invertido: number; actual: number; ganancia: number; pct: number; nombre: string }
-  >();
+  // byEtf for PortafolioAssets (client component with live prices)
+  const byEtfAssets: Record<string, { invertido: number; cantidad: number; nombre: string }> = {};
   for (const e of entries) {
-    const prev = byEtf.get(e.etf) ?? {
-      invertido: 0,
-      actual: 0,
-      ganancia: 0,
-      pct: 0,
-      nombre: e.nombre,
-    };
-    prev.invertido += e.inversionInicial;
-    prev.actual += e.valorActual;
-    prev.ganancia += e.ganancia;
-    byEtf.set(e.etf, prev);
+    if (!byEtfAssets[e.etf]) byEtfAssets[e.etf] = { invertido: 0, cantidad: 0, nombre: e.nombre };
+    byEtfAssets[e.etf].invertido += e.inversionInicial;
+    byEtfAssets[e.etf].cantidad += e.cantidad;
   }
-  // Compute pct after aggregation
-  for (const [key, data] of byEtf.entries()) {
-    data.pct = data.invertido > 0 ? (data.ganancia / data.invertido) * 100 : 0;
-    byEtf.set(key, data);
-  }
-
-  const totalWeight = resumen.valorActual;
 
   return (
     <div className="space-y-8">
@@ -82,102 +63,7 @@ export default async function PortafolioPage() {
         />
       </div>
 
-      {/* Per-asset cards */}
-      <p className="text-xs text-muted-foreground -mt-4">
-        Valores calculados con el precio registrado en Google Sheets. Los precios en tiempo real aparecen más abajo.
-      </p>
-      <div className="grid gap-4 sm:grid-cols-2">
-        {Array.from(byEtf.entries()).map(([etf, data]) => {
-          const weight =
-            totalWeight > 0 ? (data.actual / totalWeight) * 100 : 0;
-          const progressPct = Math.min(
-            data.invertido > 0 ? (data.actual / data.invertido) * 100 : 0,
-            200
-          );
-          return (
-            <Card
-              key={etf}
-              className={cn(
-                "border",
-                data.pct >= 0 ? "border-emerald-500/20" : "border-rose-500/20"
-              )}
-            >
-              <CardHeader className="pb-3">
-                <CardTitle className="flex items-center justify-between">
-                  <div>
-                    <span className="text-base font-bold">{etf}</span>
-                    <span className="ml-2 text-xs text-muted-foreground font-normal">
-                      {data.nombre}
-                    </span>
-                  </div>
-                  <span
-                    className={cn(
-                      "text-sm font-mono font-bold",
-                      data.pct >= 0 ? "text-emerald-400" : "text-rose-400"
-                    )}
-                  >
-                    {formatPercent(data.pct)}
-                  </span>
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="grid grid-cols-3 gap-3 text-sm">
-                  <div>
-                    <p className="text-xs text-muted-foreground">Invertido</p>
-                    <p className="font-mono font-medium mt-0.5">
-                      {formatUSD(data.invertido)}
-                    </p>
-                  </div>
-                  <div>
-                    <p className="text-xs text-muted-foreground">Valor actual</p>
-                    <p className="font-mono font-medium mt-0.5">
-                      {formatUSD(data.actual)}
-                    </p>
-                  </div>
-                  <div>
-                    <p className="text-xs text-muted-foreground">G / P</p>
-                    <p
-                      className={cn(
-                        "font-mono font-medium mt-0.5",
-                        data.ganancia >= 0 ? "text-emerald-400" : "text-rose-400"
-                      )}
-                    >
-                      {formatUSD(data.ganancia)}
-                    </p>
-                  </div>
-                </div>
-
-                {/* Progress bar: actual vs invertido */}
-                <div>
-                  <div className="flex justify-between text-xs text-muted-foreground mb-1">
-                    <span>Valor vs inversión inicial</span>
-                    <span>{progressPct.toFixed(1)}%</span>
-                  </div>
-                  <div className="h-1.5 rounded-full bg-muted overflow-hidden">
-                    <div
-                      className={cn(
-                        "h-full rounded-full transition-all",
-                        data.pct >= 0 ? "bg-emerald-500" : "bg-rose-500"
-                      )}
-                      style={{ width: `${Math.min(progressPct, 100)}%` }}
-                    />
-                  </div>
-                </div>
-
-                {/* Weight in portfolio */}
-                <div className="flex items-center justify-between text-xs text-muted-foreground">
-                  <span>Peso en portafolio</span>
-                  <span className="font-mono font-medium text-foreground">
-                    {weight.toFixed(1)}%
-                  </span>
-                </div>
-              </CardContent>
-            </Card>
-          );
-        })}
-      </div>
-
-      <LivePrices entries={entries} />
+      <PortafolioAssets byEtf={byEtfAssets} />
 
       <Tabs defaultValue="graficos">
         <TabsList>

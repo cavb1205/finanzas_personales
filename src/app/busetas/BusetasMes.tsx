@@ -80,10 +80,23 @@ export default function BusetasMes({ entries }: Props) {
 
   const defaultMonth = months.includes(currentMonthKey) ? currentMonthKey : (months[0] ?? "");
   const [selectedMonth, setSelectedMonth] = useState(defaultMonth);
+  const [selectedBuseta, setSelectedBuseta] = useState("all");
 
-  const filtered = useMemo(
+  const byMonth = useMemo(
     () => entries.filter((e) => toMonthKey(e.fecha) === selectedMonth),
     [entries, selectedMonth]
+  );
+
+  // Busetas available for the selected month
+  const busetas = useMemo(() => {
+    const names = new Set<string>();
+    for (const e of byMonth) if (e.buseta) names.add(e.buseta);
+    return Array.from(names).sort();
+  }, [byMonth]);
+
+  const filtered = useMemo(
+    () => selectedBuseta === "all" ? byMonth : byMonth.filter((e) => e.buseta === selectedBuseta),
+    [byMonth, selectedBuseta]
   );
 
   const bruto = filtered.reduce((s, e) => s + e.brutoTotal, 0);
@@ -95,21 +108,31 @@ export default function BusetasMes({ entries }: Props) {
 
   return (
     <div className="space-y-6">
-      {/* Month selector */}
-      <div className="flex items-center gap-3">
-        <span className="text-sm text-muted-foreground">Mes:</span>
-        <Select value={selectedMonth} onValueChange={(v) => { if (v) setSelectedMonth(v); }}>
+      {/* Filters */}
+      <div className="flex flex-wrap items-center gap-3">
+        <Select value={selectedMonth} onValueChange={(v) => { if (v) { setSelectedMonth(v); setSelectedBuseta("all"); } }}>
           <SelectTrigger className="w-52">
             <SelectValue />
           </SelectTrigger>
           <SelectContent>
             {months.map((m) => (
-              <SelectItem key={m} value={m}>
-                {monthLabel(m)}
-              </SelectItem>
+              <SelectItem key={m} value={m}>{monthLabel(m)}</SelectItem>
             ))}
           </SelectContent>
         </Select>
+        {busetas.length > 1 && (
+          <Select value={selectedBuseta} onValueChange={(v) => { if (v) setSelectedBuseta(v); }}>
+            <SelectTrigger className="w-44">
+              <SelectValue placeholder="Todas las busetas" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">Todas las busetas</SelectItem>
+              {busetas.map((b) => (
+                <SelectItem key={b} value={b}>{b}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        )}
       </div>
 
       {/* KPI cards for selected month */}

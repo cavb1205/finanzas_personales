@@ -80,7 +80,9 @@ export default function Sidebar() {
           {navItems.map((item) => {
             const isActive =
               pathname === item.href ||
-              (item.href !== "/" && pathname.startsWith(item.href));
+              (item.href !== "/" &&
+                pathname.startsWith(item.href) &&
+                (pathname[item.href.length] === "/" || pathname.length === item.href.length));
             return (
               <Link
                 key={item.href}

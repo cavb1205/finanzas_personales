@@ -13,20 +13,14 @@ import {
   Filler,
 } from "chart.js";
 import { Bar, Line } from "react-chartjs-2";
+import { useTheme } from "next-themes";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import type { MonthlySummary } from "@/lib/sheets";
 import { formatCLP } from "@/lib/format";
+import { getChartTheme } from "@/lib/chartTheme";
 
 ChartJS.register(
-  CategoryScale,
-  LinearScale,
-  BarElement,
-  PointElement,
-  LineElement,
-  Title,
-  Tooltip,
-  Legend,
-  Filler
+  CategoryScale, LinearScale, BarElement, PointElement, LineElement, Title, Tooltip, Legend, Filler
 );
 
 interface Props {
@@ -34,9 +28,11 @@ interface Props {
 }
 
 export default function ResumenCharts({ chileSum }: Props) {
+  const { resolvedTheme } = useTheme();
+  const ct = getChartTheme(resolvedTheme !== "light");
+
   if (chileSum.length === 0) return null;
 
-  // Tasa de ahorro mensual
   const tasas = chileSum.map((m) =>
     m.ingresos > 0 ? parseFloat(((m.saldo / m.ingresos) * 100).toFixed(1)) : 0
   );
@@ -77,11 +73,11 @@ export default function ResumenCharts({ chileSum }: Props) {
     responsive: true,
     maintainAspectRatio: false,
     plugins: {
-      legend: { labels: { color: "#94a3b8" } },
+      legend: { labels: { color: ct.legendColor } },
       title: {
         display: true,
         text: "Tasa de ahorro mensual",
-        color: "#e2e8f0",
+        color: ct.titleColor,
         font: { size: 15 },
       },
       tooltip: {
@@ -92,15 +88,14 @@ export default function ResumenCharts({ chileSum }: Props) {
       },
     },
     scales: {
-      x: { ticks: { color: "#64748b" }, grid: { color: "rgba(51,65,85,0.3)" } },
+      x: { ticks: { color: ct.tickColor }, grid: { color: ct.gridColor } },
       y: {
-        ticks: { color: "#64748b", callback: (v: unknown) => `${v}%` },
-        grid: { color: "rgba(51,65,85,0.3)" },
+        ticks: { color: ct.tickColor, callback: (v: unknown) => `${v}%` },
+        grid: { color: ct.gridColor },
       },
     },
   };
 
-  // Ingresos vs Gastos Chile
   const flujoData = {
     labels: chileSum.map((d) => d.month),
     datasets: [
@@ -129,11 +124,11 @@ export default function ResumenCharts({ chileSum }: Props) {
     responsive: true,
     maintainAspectRatio: false,
     plugins: {
-      legend: { labels: { color: "#94a3b8" } },
+      legend: { labels: { color: ct.legendColor } },
       title: {
         display: true,
         text: "Flujo mensual Caja Chile",
-        color: "#e2e8f0",
+        color: ct.titleColor,
         font: { size: 15 },
       },
       tooltip: {
@@ -144,13 +139,13 @@ export default function ResumenCharts({ chileSum }: Props) {
       },
     },
     scales: {
-      x: { ticks: { color: "#64748b" }, grid: { color: "rgba(51,65,85,0.3)" } },
+      x: { ticks: { color: ct.tickColor }, grid: { color: ct.gridColor } },
       y: {
         ticks: {
-          color: "#64748b",
+          color: ct.tickColor,
           callback: (v: unknown) => formatCLP(v as number),
         },
-        grid: { color: "rgba(51,65,85,0.3)" },
+        grid: { color: ct.gridColor },
       },
     },
   };
@@ -162,12 +157,12 @@ export default function ResumenCharts({ chileSum }: Props) {
         <TabsTrigger value="flujo">Flujo mensual</TabsTrigger>
       </TabsList>
       <TabsContent value="ahorro" className="mt-4">
-        <div className="h-72 rounded-xl border border-slate-700 bg-slate-800/30 p-4">
+        <div className={`h-72 rounded-xl border p-4 ${ct.bgPanel}`}>
           <Line data={tasaData} options={tasaOptions} />
         </div>
       </TabsContent>
       <TabsContent value="flujo" className="mt-4">
-        <div className="h-72 rounded-xl border border-slate-700 bg-slate-800/30 p-4">
+        <div className={`h-72 rounded-xl border p-4 ${ct.bgPanel}`}>
           <Bar data={flujoData} options={flujoOptions} />
         </div>
       </TabsContent>

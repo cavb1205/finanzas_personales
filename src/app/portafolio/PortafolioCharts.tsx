@@ -10,10 +10,12 @@ import {
   Legend,
 } from "chart.js";
 import { Bar, Doughnut } from "react-chartjs-2";
+import { useTheme } from "next-themes";
 import type { InvestmentEntry } from "@/lib/sheets";
 import { formatUSD } from "@/lib/format";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useMemo } from "react";
+import { getChartTheme } from "@/lib/chartTheme";
 
 ChartJS.register(CategoryScale, LinearScale, BarElement, ArcElement, Tooltip, Legend);
 
@@ -31,6 +33,9 @@ const DEFAULT_COLORS = [
 ];
 
 export default function PortafolioCharts({ entries }: Props) {
+  const { resolvedTheme } = useTheme();
+  const ct = getChartTheme(resolvedTheme !== "light");
+
   const byEtf = useMemo(() => {
     const map = new Map<string, { invertido: number; actual: number; ganancia: number }>();
     for (const e of entries) {
@@ -72,11 +77,11 @@ export default function PortafolioCharts({ entries }: Props) {
     responsive: true,
     maintainAspectRatio: false,
     plugins: {
-      legend: { labels: { color: "#94a3b8" } },
+      legend: { labels: { color: ct.legendColor } },
       title: {
         display: true,
         text: "Invertido vs Valor actual por activo",
-        color: "#e2e8f0",
+        color: ct.titleColor,
         font: { size: 16 },
       },
       tooltip: {
@@ -87,13 +92,13 @@ export default function PortafolioCharts({ entries }: Props) {
       },
     },
     scales: {
-      x: { ticks: { color: "#64748b" }, grid: { color: "rgba(51,65,85,0.3)" } },
+      x: { ticks: { color: ct.tickColor }, grid: { color: ct.gridColor } },
       y: {
         ticks: {
-          color: "#64748b",
+          color: ct.tickColor,
           callback: (v: unknown) => formatUSD(v as number),
         },
-        grid: { color: "rgba(51,65,85,0.3)" },
+        grid: { color: ct.gridColor },
       },
     },
   };
@@ -105,7 +110,7 @@ export default function PortafolioCharts({ entries }: Props) {
       {
         data: byEtf.map(([, d]) => d.actual),
         backgroundColor: colors.map((c) => c.arc),
-        borderColor: "rgba(15, 23, 42, 0.8)",
+        borderColor: resolvedTheme === "light" ? "rgba(241,245,249,0.8)" : "rgba(15,23,42,0.8)",
         borderWidth: 2,
       },
     ],
@@ -118,7 +123,7 @@ export default function PortafolioCharts({ entries }: Props) {
     plugins: {
       legend: {
         position: "right" as const,
-        labels: { color: "#94a3b8", font: { size: 13 }, padding: 16, boxWidth: 14 },
+        labels: { color: ct.legendColor, font: { size: 13 }, padding: 16, boxWidth: 14 },
       },
       tooltip: {
         callbacks: {
@@ -140,12 +145,12 @@ export default function PortafolioCharts({ entries }: Props) {
         <TabsTrigger value="distribucion">Distribución</TabsTrigger>
       </TabsList>
       <TabsContent value="comparacion" className="mt-4">
-        <div className="h-72 rounded-xl border border-slate-700 bg-slate-800/30 p-4">
+        <div className={`h-72 rounded-xl border p-4 ${ct.bgPanel}`}>
           <Bar data={barData} options={barOptions} />
         </div>
       </TabsContent>
       <TabsContent value="distribucion" className="mt-4">
-        <div className="h-72 rounded-xl border border-slate-700 bg-slate-800/30 p-4">
+        <div className={`h-72 rounded-xl border p-4 ${ct.bgPanel}`}>
           <Doughnut data={donutData} options={donutOptions} />
         </div>
       </TabsContent>

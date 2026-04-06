@@ -13,9 +13,11 @@ import {
   Filler,
 } from "chart.js";
 import { Bar, Doughnut } from "react-chartjs-2";
+import { useTheme } from "next-themes";
 import type { BusetaDashboard, BusetaGastosDetalle } from "@/lib/sheets";
 import { formatCOP } from "@/lib/format";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { getChartTheme } from "@/lib/chartTheme";
 
 ChartJS.register(
   CategoryScale, LinearScale, BarElement,
@@ -29,6 +31,9 @@ interface Props {
 }
 
 export default function BusetasCharts({ monthly, gastos }: Props) {
+  const { resolvedTheme } = useTheme();
+  const ct = getChartTheme(resolvedTheme !== "light");
+
   if (monthly.length === 0) return null;
 
   // Bruto vs Neto por mes
@@ -60,11 +65,11 @@ export default function BusetasCharts({ monthly, gastos }: Props) {
     responsive: true,
     maintainAspectRatio: false,
     plugins: {
-      legend: { labels: { color: "#94a3b8" } },
+      legend: { labels: { color: ct.legendColor } },
       title: {
         display: true,
         text: "Bruto / Gastos / Neto por mes",
-        color: "#e2e8f0",
+        color: ct.titleColor,
         font: { size: 16 },
       },
       tooltip: {
@@ -75,10 +80,10 @@ export default function BusetasCharts({ monthly, gastos }: Props) {
       },
     },
     scales: {
-      x: { ticks: { color: "#64748b" }, grid: { color: "rgba(51,65,85,0.3)" } },
+      x: { ticks: { color: ct.tickColor }, grid: { color: ct.gridColor } },
       y: {
-        ticks: { color: "#64748b", callback: (v: unknown) => formatCOP(v as number) },
-        grid: { color: "rgba(51,65,85,0.3)" },
+        ticks: { color: ct.tickColor, callback: (v: unknown) => formatCOP(v as number) },
+        grid: { color: ct.gridColor },
       },
     },
   };
@@ -118,7 +123,7 @@ export default function BusetasCharts({ monthly, gastos }: Props) {
       {
         data: donutValues,
         backgroundColor: donutColors,
-        borderColor: "rgba(15, 23, 42, 0.8)",
+        borderColor: resolvedTheme === "light" ? "rgba(241,245,249,0.8)" : "rgba(15,23,42,0.8)",
         borderWidth: 2,
       },
     ],
@@ -131,7 +136,7 @@ export default function BusetasCharts({ monthly, gastos }: Props) {
     plugins: {
       legend: {
         position: "right" as const,
-        labels: { color: "#94a3b8", font: { size: 12 }, padding: 14, boxWidth: 12 },
+        labels: { color: ct.legendColor, font: { size: 12 }, padding: 14, boxWidth: 12 },
       },
       tooltip: {
         callbacks: {
@@ -153,12 +158,12 @@ export default function BusetasCharts({ monthly, gastos }: Props) {
         <TabsTrigger value="gastos">Desglose gastos</TabsTrigger>
       </TabsList>
       <TabsContent value="mensual" className="mt-4">
-        <div className="h-72 rounded-xl border border-slate-700 bg-slate-800/30 p-4">
+        <div className={`h-72 rounded-xl border p-4 ${ct.bgPanel}`}>
           <Bar data={barData} options={barOptions} />
         </div>
       </TabsContent>
       <TabsContent value="gastos" className="mt-4">
-        <div className="h-72 rounded-xl border border-slate-700 bg-slate-800/30 p-4">
+        <div className={`h-72 rounded-xl border p-4 ${ct.bgPanel}`}>
           <Doughnut data={donutData} options={donutOptions} />
         </div>
       </TabsContent>

@@ -616,23 +616,15 @@ export async function getCuadreCaja(): Promise<{
     }
   }
 
-  // Cuentas: rows 20-25, cols D-F
-  const cuentaRows = [
-    { idx: 20, nombre: "Cuenta Corriente" },
-    { idx: 21, nombre: "Cuenta Rut" },
-    { idx: 22, nombre: "Cuenta Ahorros" },
-    { idx: 23, nombre: "Santander" },
-    { idx: 24, nombre: "Falabella" },
-    { idx: 25, nombre: "Erika" },
-  ];
-  for (const { idx, nombre } of cuentaRows) {
-    if (idx < rows.length) {
-      cuentas.push({
-        nombre,
-        saldo: parseCLPCOP(rows[idx]?.[5]),
-        deuda: parseCLPCOP(rows[idx]?.[6]),
-      });
-    }
+  // Cuentas: rows 20-25, col E (index 4) = nombre, col F (index 5) = saldo
+  for (let i = 20; i <= 25 && i < rows.length; i++) {
+    const nombre = (rows[i]?.[4] || "").trim();
+    if (!nombre) continue;
+    cuentas.push({
+      nombre,
+      saldo: parseCLPCOP(rows[i]?.[5]),
+      deuda: parseCLPCOP(rows[i]?.[6]),
+    });
   }
 
   // Total sistema (rutas): row 30 (index 29), col B (index 1)

@@ -11,8 +11,10 @@ import {
   Filler,
 } from "chart.js";
 import { Line } from "react-chartjs-2";
+import { useTheme } from "next-themes";
 import { formatUSD } from "@/lib/format";
 import { Skeleton } from "@/components/ui/skeleton";
+import { getChartTheme } from "@/lib/chartTheme";
 
 ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Tooltip, Filler);
 
@@ -27,6 +29,8 @@ const TICKERS = ["GOOG", "BTC"];
 interface Point { date: string; price: number }
 
 export default function PriceHistoryChart() {
+  const { resolvedTheme } = useTheme();
+  const ct = getChartTheme(resolvedTheme !== "light");
   const [ticker, setTicker] = useState("GOOG");
   const [period, setPeriod] = useState("30d");
   const [points, setPoints] = useState<Point[]>([]);
@@ -77,18 +81,18 @@ export default function PriceHistoryChart() {
     scales: {
       x: {
         ticks: {
-          color: "#64748b",
+          color: ct.tickColor,
           maxTicksLimit: 6,
           maxRotation: 0,
         },
-        grid: { color: "rgba(51,65,85,0.3)" },
+        grid: { color: ct.gridColor },
       },
       y: {
         ticks: {
-          color: "#64748b",
+          color: ct.tickColor,
           callback: (v: unknown) => formatUSD(v as number),
         },
-        grid: { color: "rgba(51,65,85,0.3)" },
+        grid: { color: ct.gridColor },
       },
     },
   };
@@ -160,7 +164,7 @@ export default function PriceHistoryChart() {
           No hay datos disponibles
         </div>
       ) : (
-        <div className="h-64 rounded-xl border border-slate-700 bg-slate-800/30 p-4">
+        <div className={`h-64 rounded-xl border p-4 ${ct.bgPanel}`}>
           <Line data={chartData} options={options} />
         </div>
       )}

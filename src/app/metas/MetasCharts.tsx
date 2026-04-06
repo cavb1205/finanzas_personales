@@ -11,7 +11,9 @@ import {
   Filler,
 } from "chart.js";
 import { Line } from "react-chartjs-2";
+import { useTheme } from "next-themes";
 import { formatCOP } from "@/lib/format";
+import { getChartTheme } from "@/lib/chartTheme";
 
 ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Tooltip, Legend, Filler);
 
@@ -27,6 +29,9 @@ interface Props {
 }
 
 export default function MetasCharts({ aportes, meta }: Props) {
+  const { resolvedTheme } = useTheme();
+  const ct = getChartTheme(resolvedTheme !== "light");
+
   if (aportes.length === 0) return null;
 
   const labels = aportes.map((a) => a.mes);
@@ -62,11 +67,11 @@ export default function MetasCharts({ aportes, meta }: Props) {
     responsive: true,
     maintainAspectRatio: false,
     plugins: {
-      legend: { labels: { color: "#94a3b8" } },
+      legend: { labels: { color: ct.legendColor } },
       title: {
         display: true,
         text: "Progreso de aportes acumulados",
-        color: "#e2e8f0",
+        color: ct.titleColor,
         font: { size: 16 },
       },
       tooltip: {
@@ -77,16 +82,16 @@ export default function MetasCharts({ aportes, meta }: Props) {
       },
     },
     scales: {
-      x: { ticks: { color: "#64748b" }, grid: { color: "rgba(51,65,85,0.3)" } },
+      x: { ticks: { color: ct.tickColor }, grid: { color: ct.gridColor } },
       y: {
-        ticks: { color: "#64748b", callback: (v: unknown) => formatCOP(v as number) },
-        grid: { color: "rgba(51,65,85,0.3)" },
+        ticks: { color: ct.tickColor, callback: (v: unknown) => formatCOP(v as number) },
+        grid: { color: ct.gridColor },
       },
     },
   };
 
   return (
-    <div className="h-72 rounded-xl border border-slate-700 bg-slate-800/30 p-4">
+    <div className={`h-72 rounded-xl border p-4 ${ct.bgPanel}`}>
       <Line data={chartData} options={options} />
     </div>
   );

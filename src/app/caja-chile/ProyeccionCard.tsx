@@ -37,14 +37,42 @@ export default function ProyeccionCard({ summary, currentMonthKey }: Props) {
   const projGastos = Math.round(dailyGastos * daysInMonth);
   const projSaldo = projIngresos - projGastos;
 
+  const daysRemaining = daysInMonth - dayOfMonth;
+  const progressPct = Math.round((dayOfMonth / daysInMonth) * 100);
+
   return (
     <Card className="border-amber-500/30 bg-amber-500/5">
       <CardContent className="pt-5">
-        <div className="flex items-center gap-2 mb-3">
-          <FiTarget className="text-amber-400" size={16} />
-          <p className="text-sm font-semibold text-amber-400">
-            Proyección fin de mes ({dayOfMonth}/{daysInMonth} días)
-          </p>
+        <div className="flex items-center justify-between gap-2 mb-3">
+          <div className="flex items-center gap-2">
+            <FiTarget className="text-amber-400" size={16} />
+            <p className="text-sm font-semibold text-amber-400">
+              Proyección fin de mes
+            </p>
+          </div>
+          <div className="flex items-center gap-3 text-xs text-muted-foreground">
+            <span>
+              <span className="font-mono font-semibold text-foreground">{dayOfMonth}</span>
+              {" "}días transcurridos
+            </span>
+            <span className="text-amber-400/60">·</span>
+            <span>
+              <span className="font-mono font-semibold text-amber-400">{daysRemaining}</span>
+              {" "}restantes
+            </span>
+          </div>
+        </div>
+        <div className="mb-4">
+          <div className="flex justify-between text-xs text-muted-foreground mb-1">
+            <span>{progressPct}% del mes transcurrido</span>
+            <span>{dayOfMonth}/{daysInMonth}</span>
+          </div>
+          <div className="h-1.5 rounded-full bg-muted overflow-hidden">
+            <div
+              className="h-full rounded-full bg-amber-500/60 transition-all"
+              style={{ width: `${progressPct}%` }}
+            />
+          </div>
         </div>
         <div className="grid grid-cols-3 gap-3 text-center">
           <div>

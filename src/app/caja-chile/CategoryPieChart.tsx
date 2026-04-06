@@ -3,8 +3,10 @@
 import { useMemo } from "react";
 import { Chart as ChartJS, ArcElement, Tooltip, Legend } from "chart.js";
 import { Doughnut } from "react-chartjs-2";
+import { useTheme } from "next-themes";
 import type { Transaction } from "@/lib/sheets";
 import { formatCLP } from "@/lib/format";
+import { getChartTheme } from "@/lib/chartTheme";
 
 ChartJS.register(ArcElement, Tooltip, Legend);
 
@@ -24,6 +26,9 @@ interface Props {
 }
 
 export default function CategoryPieChart({ transactions }: Props) {
+  const { resolvedTheme } = useTheme();
+  const ct = getChartTheme(resolvedTheme !== "light");
+
   const data = useMemo(() => {
     const map = new Map<string, number>();
     for (const t of transactions) {
@@ -44,7 +49,7 @@ export default function CategoryPieChart({ transactions }: Props) {
       {
         data: data.map(([, value]) => value),
         backgroundColor: COLORS.slice(0, data.length),
-        borderColor: "rgba(15, 23, 42, 0.8)",
+        borderColor: resolvedTheme === "light" ? "rgba(241,245,249,0.8)" : "rgba(15,23,42,0.8)",
         borderWidth: 2,
       },
     ],
@@ -58,7 +63,7 @@ export default function CategoryPieChart({ transactions }: Props) {
       legend: {
         position: "right" as const,
         labels: {
-          color: "#94a3b8",
+          color: ct.legendColor,
           font: { size: 12 },
           padding: 12,
           boxWidth: 12,
@@ -79,7 +84,7 @@ export default function CategoryPieChart({ transactions }: Props) {
   };
 
   return (
-    <div className="h-64 rounded-xl border border-slate-700 bg-slate-800/30 p-4">
+    <div className={`h-64 rounded-xl border p-4 ${ct.bgPanel}`}>
       <Doughnut data={chartData} options={options} />
     </div>
   );

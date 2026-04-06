@@ -1,7 +1,6 @@
 import {
   FiDollarSign,
   FiGlobe,
-  FiTrendingUp,
   FiTarget,
   FiUsers,
   FiTruck,
@@ -17,6 +16,7 @@ import {
 import { formatCLP, formatCOP, formatUSD, formatPercent } from "@/lib/format";
 import DashboardCharts from "./DashboardCharts";
 import PatrimonioNeto from "./PatrimonioNeto";
+import PortafolioDashboardCard from "./PortafolioDashboardCard";
 import {
   Table,
   TableBody,
@@ -53,6 +53,14 @@ export default async function Dashboard() {
     (s, p) => s + p.saldoPendiente,
     0
   );
+
+  // byEtf for live price card
+  const byEtfDashboard: Record<string, { invertido: number; cantidad: number; nombre: string }> = {};
+  for (const e of portafolio.entries) {
+    if (!byEtfDashboard[e.etf]) byEtfDashboard[e.etf] = { invertido: 0, cantidad: 0, nombre: e.nombre };
+    byEtfDashboard[e.etf].invertido += e.inversionInicial;
+    byEtfDashboard[e.etf].cantidad += e.cantidad;
+  }
 
   const apartamentoPercent =
     apartamento.valorTotal > 0
@@ -117,13 +125,9 @@ export default async function Dashboard() {
           icon={<FiGlobe size={20} />}
           color={colombiaSaldo >= 0 ? "blue" : "rose"}
         />
-        <DashboardCard
-          title="Portafolio"
-          value={formatUSD(portafolio.resumen.valorActual)}
-          subtitle={`Invertido ${formatUSD(portafolio.resumen.inversionTotal)} · ${formatPercent(portafolio.resumen.gananciaPercent)}`}
-          tooltip="Valor de mercado actual del portafolio de inversiones (GOOG + BTC) en dólares"
-          icon={<FiTrendingUp size={20} />}
-          color={portafolio.resumen.ganancia >= 0 ? "indigo" : "rose"}
+        <PortafolioDashboardCard
+          byEtf={byEtfDashboard}
+          inversionTotal={portafolio.resumen.inversionTotal}
         />
         <DashboardCard
           title="Préstamos pendientes"

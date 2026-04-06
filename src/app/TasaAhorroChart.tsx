@@ -12,17 +12,12 @@ import {
   Filler,
 } from "chart.js";
 import { Bar } from "react-chartjs-2";
+import { useTheme } from "next-themes";
 import type { MonthlySummary } from "@/lib/sheets";
+import { getChartTheme } from "@/lib/chartTheme";
 
 ChartJS.register(
-  CategoryScale,
-  LinearScale,
-  BarElement,
-  PointElement,
-  LineElement,
-  Tooltip,
-  Legend,
-  Filler
+  CategoryScale, LinearScale, BarElement, PointElement, LineElement, Tooltip, Legend, Filler
 );
 
 interface Props {
@@ -30,6 +25,9 @@ interface Props {
 }
 
 export default function TasaAhorroChart({ summary }: Props) {
+  const { resolvedTheme } = useTheme();
+  const ct = getChartTheme(resolvedTheme !== "light");
+
   if (summary.length === 0) return null;
 
   const tasas = summary.map((m) =>
@@ -58,11 +56,11 @@ export default function TasaAhorroChart({ summary }: Props) {
     responsive: true,
     maintainAspectRatio: false,
     plugins: {
-      legend: { labels: { color: "#94a3b8" } },
+      legend: { labels: { color: ct.legendColor } },
       title: {
         display: true,
         text: "Tasa de ahorro por mes (%)",
-        color: "#e2e8f0",
+        color: ct.titleColor,
         font: { size: 16 },
       },
       tooltip: {
@@ -72,19 +70,19 @@ export default function TasaAhorroChart({ summary }: Props) {
       },
     },
     scales: {
-      x: { ticks: { color: "#64748b" }, grid: { color: "rgba(51,65,85,0.3)" } },
+      x: { ticks: { color: ct.tickColor }, grid: { color: ct.gridColor } },
       y: {
         ticks: {
-          color: "#64748b",
+          color: ct.tickColor,
           callback: (v: unknown) => `${v}%`,
         },
-        grid: { color: "rgba(51,65,85,0.3)" },
+        grid: { color: ct.gridColor },
       },
     },
   };
 
   return (
-    <div className="h-64 rounded-xl border border-slate-700 bg-slate-800/30 p-4">
+    <div className={`h-64 rounded-xl border p-4 ${ct.bgPanel}`}>
       <Bar data={chartData} options={options} />
     </div>
   );

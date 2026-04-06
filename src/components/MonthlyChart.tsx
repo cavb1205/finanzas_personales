@@ -10,17 +10,12 @@ import {
   Legend,
 } from "chart.js";
 import { Bar } from "react-chartjs-2";
+import { useTheme } from "next-themes";
 import type { MonthlySummary } from "@/lib/sheets";
 import { formatCLP, formatCOP } from "@/lib/format";
+import { getChartTheme } from "@/lib/chartTheme";
 
-ChartJS.register(
-  CategoryScale,
-  LinearScale,
-  BarElement,
-  Title,
-  Tooltip,
-  Legend
-);
+ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend);
 
 interface Props {
   data: MonthlySummary[];
@@ -29,7 +24,10 @@ interface Props {
 }
 
 export default function MonthlyChart({ data, title = "Resumen Mensual", currency = "CLP" }: Props) {
+  const { resolvedTheme } = useTheme();
+  const ct = getChartTheme(resolvedTheme !== "light");
   const fmt = currency === "COP" ? formatCOP : formatCLP;
+
   const chartData = {
     labels: data.map((d) => d.month),
     datasets: [
@@ -52,13 +50,11 @@ export default function MonthlyChart({ data, title = "Resumen Mensual", currency
     responsive: true,
     maintainAspectRatio: false,
     plugins: {
-      legend: {
-        labels: { color: "#94a3b8" },
-      },
+      legend: { labels: { color: ct.legendColor } },
       title: {
         display: true,
         text: title,
-        color: "#e2e8f0",
+        color: ct.titleColor,
         font: { size: 16 },
       },
       tooltip: {
@@ -70,21 +66,21 @@ export default function MonthlyChart({ data, title = "Resumen Mensual", currency
     },
     scales: {
       x: {
-        ticks: { color: "#64748b" },
-        grid: { color: "rgba(51, 65, 85, 0.3)" },
+        ticks: { color: ct.tickColor },
+        grid: { color: ct.gridColor },
       },
       y: {
         ticks: {
-          color: "#64748b",
+          color: ct.tickColor,
           callback: (v: unknown) => fmt(v as number),
         },
-        grid: { color: "rgba(51, 65, 85, 0.3)" },
+        grid: { color: ct.gridColor },
       },
     },
   };
 
   return (
-    <div className="h-80 rounded-xl border border-slate-700 bg-slate-800/30 p-4">
+    <div className={`h-80 rounded-xl border p-4 ${ct.bgPanel}`}>
       <Bar data={chartData} options={options} />
     </div>
   );

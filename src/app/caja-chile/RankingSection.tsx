@@ -42,6 +42,15 @@ function monthLabel(key: string): string {
   return date.toLocaleDateString("es-CL", { month: "long", year: "numeric" });
 }
 
+/** Normalize a category string: lowercase, trim, remove accents, unify known variants */
+function normalizeCategoria(cat: string): string {
+  return cat
+    .trim()
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, ""); // strip accents: préstamo → prestamo, inversión → inversion
+}
+
 function buildRanking(
   transactions: Transaction[],
   type: "gasto" | "ingreso",

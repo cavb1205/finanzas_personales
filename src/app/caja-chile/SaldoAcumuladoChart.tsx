@@ -12,19 +12,12 @@ import {
   Filler,
 } from "chart.js";
 import { Line } from "react-chartjs-2";
+import { useTheme } from "next-themes";
 import type { MonthlySummary } from "@/lib/sheets";
 import { formatCLP, formatCOP } from "@/lib/format";
+import { getChartTheme } from "@/lib/chartTheme";
 
-ChartJS.register(
-  CategoryScale,
-  LinearScale,
-  PointElement,
-  LineElement,
-  Title,
-  Tooltip,
-  Legend,
-  Filler
-);
+ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend, Filler);
 
 interface Props {
   summary: MonthlySummary[];
@@ -32,7 +25,10 @@ interface Props {
 }
 
 export default function SaldoAcumuladoChart({ summary, currency = "CLP" }: Props) {
+  const { resolvedTheme } = useTheme();
+  const ct = getChartTheme(resolvedTheme !== "light");
   const fmt = currency === "COP" ? formatCOP : formatCLP;
+
   if (summary.length === 0) return null;
 
   let acum = 0;
@@ -68,11 +64,11 @@ export default function SaldoAcumuladoChart({ summary, currency = "CLP" }: Props
     responsive: true,
     maintainAspectRatio: false,
     plugins: {
-      legend: { labels: { color: "#94a3b8" } },
+      legend: { labels: { color: ct.legendColor } },
       title: {
         display: true,
         text: "Saldo acumulado",
-        color: "#e2e8f0",
+        color: ct.titleColor,
         font: { size: 16 },
       },
       tooltip: {
@@ -83,21 +79,21 @@ export default function SaldoAcumuladoChart({ summary, currency = "CLP" }: Props
     },
     scales: {
       x: {
-        ticks: { color: "#64748b" },
-        grid: { color: "rgba(51, 65, 85, 0.3)" },
+        ticks: { color: ct.tickColor },
+        grid: { color: ct.gridColor },
       },
       y: {
         ticks: {
-          color: "#64748b",
+          color: ct.tickColor,
           callback: (v: unknown) => fmt(v as number),
         },
-        grid: { color: "rgba(51, 65, 85, 0.3)" },
+        grid: { color: ct.gridColor },
       },
     },
   };
 
   return (
-    <div className="h-64 rounded-xl border border-slate-700 bg-slate-800/30 p-4">
+    <div className={`h-64 rounded-xl border p-4 ${ct.bgPanel}`}>
       <Line data={chartData} options={options} />
     </div>
   );

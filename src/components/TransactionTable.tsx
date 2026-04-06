@@ -21,12 +21,15 @@ interface Props {
   pageSize?: number;
 }
 
+/** Normalize category for comparison and display: lowercase + strip accents */
+function normCat(cat: string): string {
+  return cat.trim().toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+}
+
 const categoryVariant: Record<string, string> = {
   ingreso:  "bg-emerald-500/15 text-emerald-400 border-emerald-500/20",
   gasto:    "bg-rose-500/15 text-rose-400 border-rose-500/20",
-  préstamo: "bg-amber-500/15 text-amber-400 border-amber-500/20",
   prestamo: "bg-amber-500/15 text-amber-400 border-amber-500/20",
-  inversión:"bg-blue-500/15 text-blue-400 border-blue-500/20",
   inversion:"bg-blue-500/15 text-blue-400 border-blue-500/20",
 };
 
@@ -66,10 +69,15 @@ export default function TransactionTable({
 
   const format = currency === "CLP" ? formatCLP : formatCOP;
 
-  const categories = useMemo(
-    () => Array.from(new Set(transactions.map((t) => t.categoria.toLowerCase()))).filter(Boolean),
-    [transactions]
-  );
+  // Deduplicate categories after normalizing (strips accents + lowercase)
+  const categories = useMemo(() => {
+    const seen = new Map<string, string>(); // normalized → original display value
+    for (const t of transactions) {
+      const norm = normCat(t.categoria);
+      if (norm && !seen.has(norm)) seen.set(norm, t.categoria.trim());
+    }
+    return Array.from(seen.entries()); // [normalized, display]
+  }, [transactions]);
 
   // Build sorted list of available months
   const months = useMemo(() => {
@@ -87,7 +95,7 @@ export default function TransactionTable({
         t.descripcion.toLowerCase().includes(search.toLowerCase()) ||
         t.fecha.includes(search);
       const matchesCategory =
-        categoryFilter === "all" || t.categoria.toLowerCase() === categoryFilter;
+        categoryFilter === "all" || normCat(t.categoria) === categoryFilter;
       const matchesMonth =
         monthFilter === "all" || toMonthKey(t.fecha) === monthFilter;
       return matchesText && matchesCategory && matchesMonth;
@@ -128,9 +136,9 @@ export default function TransactionTable({
           </SelectTrigger>
           <SelectContent>
             <SelectItem value="all">Todas</SelectItem>
-            {categories.map((c) => (
-              <SelectItem key={c} value={c}>
-                {c.charAt(0).toUpperCase() + c.slice(1)}
+            {categories.map(([norm, display]) => (
+              <SelectItem key={norm} value={norm}>
+                {display.charAt(0).toUpperCase() + display.slice(1)}
               </SelectItem>
             ))}
           </SelectContent>
@@ -182,7 +190,7 @@ export default function TransactionTable({
                   <TableCell>
                     <span className={cn(
                       "inline-flex items-center rounded-full border px-2 py-0.5 text-xs font-medium",
-                      categoryVariant[t.categoria.toLowerCase()] ?? "bg-muted text-muted-foreground border-border"
+                      categoryVariant[normCat(t.categoria)] ?? "bg-muted text-muted-foreground border-border"
                     )}>
                       {t.categoria}
                     </span>
