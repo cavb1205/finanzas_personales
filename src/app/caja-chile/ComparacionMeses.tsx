@@ -60,6 +60,11 @@ function Row({
   );
 }
 
+function formatMonthOption(month: string): string {
+  // month comes as "enero 2026" from the sheet — capitalize first letter
+  return month.charAt(0).toUpperCase() + month.slice(1);
+}
+
 export default function ComparacionMeses({ summary }: Props) {
   const months = useMemo(() => summary.map((m) => m.month), [summary]);
 
@@ -84,7 +89,7 @@ export default function ComparacionMeses({ summary }: Props) {
               </SelectTrigger>
               <SelectContent>
                 {months.map((m) => (
-                  <SelectItem key={m} value={m}>{m}</SelectItem>
+                  <SelectItem key={m} value={m}>{formatMonthOption(m)}</SelectItem>
                 ))}
               </SelectContent>
             </Select>
@@ -97,7 +102,7 @@ export default function ComparacionMeses({ summary }: Props) {
               </SelectTrigger>
               <SelectContent>
                 {months.map((m) => (
-                  <SelectItem key={m} value={m}>{m}</SelectItem>
+                  <SelectItem key={m} value={m}>{formatMonthOption(m)}</SelectItem>
                 ))}
               </SelectContent>
             </Select>
@@ -110,8 +115,8 @@ export default function ComparacionMeses({ summary }: Props) {
             {/* Header */}
             <div className="grid grid-cols-4 gap-2 mb-1">
               <span />
-              <span className="text-xs text-muted-foreground text-right font-medium">{mesA}</span>
-              <span className="text-xs text-muted-foreground text-right font-medium">{mesB}</span>
+              <span className="text-xs text-muted-foreground text-right font-medium">{formatMonthOption(mesA)}</span>
+              <span className="text-xs text-muted-foreground text-right font-medium">{formatMonthOption(mesB)}</span>
               <span className="text-xs text-muted-foreground text-right">Δ A vs B</span>
             </div>
             <Row label="Ingresos" a={dataA.ingresos} b={dataB.ingresos} type="ingreso" />

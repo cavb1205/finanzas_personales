@@ -1,10 +1,9 @@
-import { FiDollarSign, FiCreditCard, FiMonitor, FiTrendingUp } from "react-icons/fi";
+import { FiDollarSign, FiCreditCard, FiActivity, FiAlertCircle, FiCheckCircle } from "react-icons/fi";
 import DashboardCard from "@/components/DashboardCard";
 import { getCuadreCaja } from "@/lib/sheets";
-import { formatCOP } from "@/lib/format";
+import { formatCLP } from "@/lib/format";
 import { Separator } from "@/components/ui/separator";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 import CuadreCajaCharts from "./CuadreCajaCharts";
 import EmptyState from "@/components/EmptyState";
@@ -23,14 +22,20 @@ export default async function CuadreCajaPage() {
   } = await getCuadreCaja();
 
   const totalCuentasSaldo = cuentas.reduce((s, c) => s + c.saldo, 0);
-  const totalDeudas = cuentas.reduce((s, c) => s + c.deuda, 0);
+  const totalCajaEfectivo = terminales.reduce((s, t) => s + t.caja, 0);
+  const totalCajaMasCuentas = totalCajaEfectivo + totalCuentasSaldo;
+
+  // Calculate saldo from our own numbers, not from sheet
+  const saldoCalculado = totalCajaMasCuentas - totalTerminales;
+  const cuadrado = saldoCalculado === 0;
+  const favor = saldoCalculado > 0;
 
   if (terminales.length === 0 && cuentas.length === 0) {
     return (
       <div className="space-y-8">
         <div>
           <h1 className="text-2xl font-bold tracking-tight">Cuadre de Caja</h1>
-          <p className="text-muted-foreground text-sm mt-1">Balance operativo de terminales y cuentas</p>
+          <p className="text-muted-foreground text-sm mt-1">Balance operativo de rutas y cuentas bancarias</p>
         </div>
         <Separator />
         <EmptyState title="Sin datos de cuadre" description="No hay datos de cuadre de caja disponibles." />
@@ -43,88 +48,113 @@ export default async function CuadreCajaPage() {
       <div>
         <h1 className="text-2xl font-bold tracking-tight">Cuadre de Caja</h1>
         <p className="text-muted-foreground text-sm mt-1">
-          Balance operativo de terminales y cuentas bancarias
+          Control del efectivo por ruta vs lo registrado en sistema
         </p>
       </div>
 
       <Separator />
 
-      {/* Summary cards */}
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+      {/* Balance general */}
+      <div className="grid gap-4 sm:grid-cols-3">
         <DashboardCard
-          title="Total Terminales"
-          value={formatCOP(totalTerminales)}
-          tooltip="Suma del efectivo en caja de todos los terminales"
-          icon={<FiMonitor size={20} />}
+          title="Total Sistema (rutas)"
+          value={formatCLP(totalTerminales)}
+          tooltip="Suma de lo que debería haber en caja según el sistema, por todas las rutas"
+          icon={<FiActivity size={20} />}
           color="blue"
         />
         <DashboardCard
           title="Total Caja + Cuentas"
-          value={formatCOP(totalCuentas)}
-          tooltip="Suma de efectivo en terminales más saldos en cuentas bancarias"
+          value={formatCLP(totalCajaMasCuentas)}
+          tooltip="Caja efectivo de todas las rutas + saldos en cuentas bancarias"
           icon={<FiDollarSign size={20} />}
           color="emerald"
         />
         <DashboardCard
-          title="Saldo Favor / Contra"
-          value={formatCOP(saldoFavor)}
-          tooltip="Diferencia entre lo registrado en sistema y el efectivo real en caja"
-          icon={<FiTrendingUp size={20} />}
-          color={saldoFavor >= 0 ? "emerald" : "rose"}
-        />
-        <DashboardCard
-          title="Total Deudas"
-          value={formatCOP(totalDeudas)}
-          tooltip="Suma de deudas en tarjetas y créditos bancarios"
-          icon={<FiCreditCard size={20} />}
-          color="rose"
+          title={cuadrado ? "Cuadrado" : favor ? "Saldo a Favor" : "Saldo en Contra"}
+          value={formatCLP(Math.abs(saldoCalculado))}
+          subtitle={
+            cuadrado
+              ? "Todo cuadrado"
+              : favor
+              ? "Tienes más efectivo del esperado"
+              : "Falta efectivo vs sistema"
+          }
+          tooltip="Diferencia entre el efectivo real (caja + cuentas) y lo que debería haber según el sistema"
+          icon={cuadrado ? <FiCheckCircle size={20} /> : <FiAlertCircle size={20} />}
+          color={cuadrado ? "emerald" : favor ? "emerald" : "rose"}
         />
       </div>
 
       <div className="grid gap-6 lg:grid-cols-2">
-        {/* Terminales */}
+        {/* Terminales / Rutas */}
         {terminales.length > 0 && (
           <Card>
             <CardHeader className="pb-3">
               <CardTitle className="text-base flex items-center gap-2">
-                <FiMonitor size={15} className="text-blue-400" />
-                Terminales
+                <FiActivity size={15} className="text-blue-400" />
+                Rutas
               </CardTitle>
             </CardHeader>
-            <CardContent className="space-y-3">
+            <CardContent className="space-y-0 divide-y divide-border">
+              {/* Column header */}
+              <div className="grid grid-cols-4 gap-2 pb-2 text-xs text-muted-foreground">
+                <span className="col-span-1">Ruta</span>
+                <span className="text-right">Caja Sistema</span>
+                <span className="text-right">Caja Efectivo</span>
+                <span className="text-right">Diferencia</span>
+              </div>
               {terminales.map((t) => {
                 const diff = t.caja - t.sistema;
                 return (
-                  <div key={t.nombre} className="space-y-1.5">
-                    <div className="flex items-center justify-between text-sm">
-                      <span className="font-medium">{t.nombre}</span>
-                      <Badge
-                        variant="outline"
-                        className={cn(
-                          "text-xs font-mono",
-                          diff === 0
-                            ? "border-emerald-500/30 text-emerald-400"
-                            : diff > 0
-                            ? "border-blue-500/30 text-blue-400"
-                            : "border-rose-500/30 text-rose-400"
-                        )}
-                      >
-                        {diff > 0 ? "+" : ""}{formatCOP(diff)}
-                      </Badge>
-                    </div>
-                    <div className="grid grid-cols-2 gap-2 text-xs text-muted-foreground">
-                      <div className="flex justify-between">
-                        <span>Sistema</span>
-                        <span className="font-mono">{formatCOP(t.sistema)}</span>
-                      </div>
-                      <div className="flex justify-between">
-                        <span>Caja</span>
-                        <span className="font-mono">{formatCOP(t.caja)}</span>
-                      </div>
-                    </div>
+                  <div key={t.nombre} className="grid grid-cols-4 items-center gap-2 py-3">
+                    <span className="font-medium text-sm col-span-1">{t.nombre}</span>
+                    <span className="font-mono text-sm text-right text-muted-foreground">
+                      {formatCLP(t.sistema)}
+                    </span>
+                    <span className="font-mono text-sm text-right">
+                      {formatCLP(t.caja)}
+                    </span>
+                    <span
+                      className={cn(
+                        "font-mono text-sm font-semibold text-right",
+                        diff === 0
+                          ? "text-emerald-400"
+                          : diff > 0
+                          ? "text-blue-400"
+                          : "text-rose-400"
+                      )}
+                    >
+                      {diff > 0 ? "+" : ""}
+                      {formatCLP(diff)}
+                    </span>
                   </div>
                 );
               })}
+              {/* Totals row */}
+              <div className="grid grid-cols-4 items-center gap-2 pt-3">
+                <span className="text-xs text-muted-foreground font-semibold col-span-1">Total</span>
+                <span className="font-mono text-sm font-semibold text-right text-blue-400">
+                  {formatCLP(terminales.reduce((s, t) => s + t.sistema, 0))}
+                </span>
+                <span className="font-mono text-sm font-semibold text-right text-emerald-400">
+                  {formatCLP(terminales.reduce((s, t) => s + t.caja, 0))}
+                </span>
+                <span
+                  className={cn(
+                    "font-mono text-sm font-semibold text-right",
+                    (() => {
+                      const d = terminales.reduce((s, t) => s + (t.caja - t.sistema), 0);
+                      return d === 0 ? "text-emerald-400" : d > 0 ? "text-blue-400" : "text-rose-400";
+                    })()
+                  )}
+                >
+                  {(() => {
+                    const d = terminales.reduce((s, t) => s + (t.caja - t.sistema), 0);
+                    return `${d > 0 ? "+" : ""}${formatCLP(d)}`;
+                  })()}
+                </span>
+              </div>
             </CardContent>
           </Card>
         )}
@@ -138,37 +168,82 @@ export default async function CuadreCajaPage() {
                 Cuentas Bancarias
               </CardTitle>
             </CardHeader>
-            <CardContent className="space-y-2">
+            <CardContent className="space-y-0 divide-y divide-border">
               {cuentas.map((c) => (
-                <div key={c.nombre} className="flex items-center justify-between text-sm py-1.5 border-b border-border last:border-0">
+                <div
+                  key={c.nombre}
+                  className="flex items-center justify-between py-3 text-sm"
+                >
                   <span className="text-muted-foreground">{c.nombre}</span>
-                  <div className="text-right space-y-0.5">
-                    {c.saldo > 0 && (
-                      <p className="font-mono text-xs text-emerald-400">
-                        {formatCOP(c.saldo)}
-                      </p>
+                  <span
+                    className={cn(
+                      "font-mono font-medium",
+                      c.saldo > 0 ? "text-emerald-400" : "text-muted-foreground"
                     )}
-                    {c.deuda > 0 && (
-                      <p className="font-mono text-xs text-rose-400">
-                        -{formatCOP(c.deuda)}
-                      </p>
-                    )}
-                    {c.saldo === 0 && c.deuda === 0 && (
-                      <p className="font-mono text-xs text-muted-foreground">—</p>
-                    )}
-                  </div>
+                  >
+                    {c.saldo > 0 ? formatCLP(c.saldo) : "—"}
+                  </span>
                 </div>
               ))}
-              <div className="pt-2 flex items-center justify-between text-sm font-semibold">
-                <span>Neto cuentas</span>
-                <span className={cn("font-mono", (totalCuentasSaldo - totalDeudas) >= 0 ? "text-emerald-400" : "text-rose-400")}>
-                  {formatCOP(totalCuentasSaldo - totalDeudas)}
+              <div className="flex items-center justify-between pt-3 text-sm font-semibold">
+                <span>Total cuentas</span>
+                <span className={cn("font-mono", totalCuentasSaldo > 0 ? "text-emerald-400" : "text-muted-foreground")}>
+                  {formatCLP(totalCuentasSaldo)}
                 </span>
               </div>
             </CardContent>
           </Card>
         )}
       </div>
+
+      {/* Balance general detallado */}
+      <Card>
+        <CardHeader className="pb-3">
+          <CardTitle className="text-base">Balance General</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-0 divide-y divide-border">
+            <div className="flex items-center justify-between py-3 text-sm">
+              <div>
+                <p className="font-medium">Total Sistema (rutas)</p>
+                <p className="text-xs text-muted-foreground mt-0.5">Lo que debería haber en caja según el sistema</p>
+              </div>
+              <span className="font-mono font-semibold text-blue-400">{formatCLP(totalTerminales)}</span>
+            </div>
+            <div className="flex items-center justify-between py-3 text-sm">
+              <div>
+                <p className="font-medium">Total Caja + Cuentas</p>
+                <p className="text-xs text-muted-foreground mt-0.5">
+                  Caja efectivo rutas ({formatCLP(terminales.reduce((s,t)=>s+t.caja,0))}) + cuentas bancarias ({formatCLP(totalCuentasSaldo)})
+                </p>
+              </div>
+              <span className="font-mono font-semibold text-emerald-400">{formatCLP(totalCajaMasCuentas)}</span>
+            </div>
+            <div className="flex items-center justify-between py-3 text-sm">
+              <div>
+                <p className="font-medium">
+                  {cuadrado ? "Cuadrado ✓" : favor ? "Saldo a Favor" : "Saldo en Contra"}
+                </p>
+                <p className="text-xs text-muted-foreground mt-0.5">
+                  {cuadrado
+                    ? "El efectivo coincide exactamente con el sistema"
+                    : favor
+                    ? "Tienes más efectivo del que debería haber"
+                    : "Falta efectivo — revisar administración del dinero"}
+                </p>
+              </div>
+              <span
+                className={cn(
+                  "font-mono font-semibold text-lg",
+                  cuadrado ? "text-emerald-400" : favor ? "text-emerald-400" : "text-rose-400"
+                )}
+              >
+                {favor ? "+" : cuadrado ? "" : "-"}{formatCLP(Math.abs(saldoCalculado))}
+              </span>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
 
       {/* Histórico mensual */}
       <div className="space-y-3">

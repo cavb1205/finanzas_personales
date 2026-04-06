@@ -635,13 +635,9 @@ export async function getCuadreCaja(): Promise<{
     }
   }
 
-  // Totals from row 19 area
-  if (rows[19]) {
-    totalTerminales = parseCLPCOP(rows[19][8]); // "TOTAL TERMINALES"
-    totalCuentas = parseCLPCOP(rows[19][9]); // "TOTAL CAJA+CUENTAS"
-  }
-  if (rows[22]) {
-    saldoFavor = parseCLPCOP(rows[22][8]); // "SALDO FAVOR - CONTRA"
+  // Total sistema (rutas): row 30 (index 29), col B (index 1)
+  if (rows[29]) {
+    totalTerminales = parseCLPCOP(rows[29][1]);
   }
 
   // Monthly data 2025: rows 26-37, last column (index 22) is TOTAL

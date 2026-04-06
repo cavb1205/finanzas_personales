@@ -48,6 +48,26 @@ export default async function CajaChilePage() {
       ? deltaPct(lastMonth.saldo, prevMonth.saldo)
       : undefined;
 
+  // Mes actual — filtrar transacciones del mes en curso (formato DD/MM/YYYY o D/MM/YYYY)
+  const mesActualTx = transactions.filter((t) => {
+    const sep = t.fecha.includes("/") ? "/" : "-";
+    const parts = t.fecha.split(sep);
+    if (parts.length === 3) {
+      // YYYY-MM-DD
+      if (parts[0].length === 4) {
+        return `${parts[0]}-${parts[1].padStart(2, "0")}` === currentMonthKey;
+      }
+      // DD/MM/YYYY or D/MM/YYYY
+      return `${parts[2]}-${parts[1].padStart(2, "0")}` === currentMonthKey;
+    }
+    return false;
+  });
+  const mesIngresos = mesActualTx.reduce((s, t) => s + t.ingreso, 0);
+  const mesGastos = mesActualTx.reduce((s, t) => s + t.gasto, 0);
+  const mesSaldo = mesIngresos - mesGastos;
+  const mesLabel = now.toLocaleDateString("es-CL", { month: "long" });
+  const hasMesActual = mesActualTx.length > 0;
+
   return (
     <div className="space-y-8">
       <div>
@@ -61,25 +81,28 @@ export default async function CajaChilePage() {
 
       <div className="grid gap-4 sm:grid-cols-3">
         <DashboardCard
-          title="Total Ingresos"
-          value={formatCLP(totalIngresos)}
-          subtitle={deltaIngresos}
+          title="Ingresos"
+          value={hasMesActual ? formatCLP(mesIngresos) : formatCLP(totalIngresos)}
+          subtitle={hasMesActual ? `${mesLabel} en curso` : deltaIngresos}
           icon={<FiTrendingUp size={20} />}
           color="emerald"
+          secondary={hasMesActual ? { label: "Total acumulado", value: formatCLP(totalIngresos) } : undefined}
         />
         <DashboardCard
-          title="Total Gastos"
-          value={formatCLP(totalGastos)}
-          subtitle={deltaGastos}
+          title="Gastos"
+          value={hasMesActual ? formatCLP(mesGastos) : formatCLP(totalGastos)}
+          subtitle={hasMesActual ? `${mesLabel} en curso` : deltaGastos}
           icon={<FiTrendingDown size={20} />}
           color="rose"
+          secondary={hasMesActual ? { label: "Total acumulado", value: formatCLP(totalGastos) } : undefined}
         />
         <DashboardCard
           title="Saldo"
-          value={formatCLP(saldo)}
-          subtitle={deltaSaldo}
+          value={hasMesActual ? formatCLP(mesSaldo) : formatCLP(saldo)}
+          subtitle={hasMesActual ? `${mesLabel} en curso` : deltaSaldo}
           icon={<FiDollarSign size={20} />}
-          color={saldo >= 0 ? "emerald" : "rose"}
+          color={hasMesActual ? (mesSaldo >= 0 ? "emerald" : "rose") : (saldo >= 0 ? "emerald" : "rose")}
+          secondary={hasMesActual ? { label: "Total acumulado", value: formatCLP(saldo) } : undefined}
         />
       </div>
 

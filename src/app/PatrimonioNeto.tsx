@@ -105,6 +105,9 @@ export default function PatrimonioNeto({
               <p className="text-xs text-muted-foreground text-center">
                 del ingreso ahorrado en {mesLabel}
               </p>
+              <p className="text-xs text-muted-foreground/60 text-center italic">
+                Mes en curso — puede variar
+              </p>
               <div className="w-full mt-2 h-2 rounded-full bg-muted overflow-hidden">
                 <div
                   className={cn(

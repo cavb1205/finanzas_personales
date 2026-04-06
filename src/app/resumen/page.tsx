@@ -19,28 +19,35 @@ function KpiRow({
   value,
   sub,
   positive,
+  currency,
 }: {
   label: string;
   value: string;
   sub?: string;
   positive?: boolean;
+  currency?: "CLP" | "COP" | "USD";
 }) {
   return (
     <div className="flex items-center justify-between py-2.5 border-b border-border last:border-0">
       <span className="text-sm text-muted-foreground">{label}</span>
       <div className="text-right">
-        <span
-          className={cn(
-            "font-mono text-sm font-semibold",
-            positive === true
-              ? "text-emerald-400"
-              : positive === false
-              ? "text-rose-400"
-              : "text-foreground"
+        <div className="flex items-center gap-1.5 justify-end">
+          {currency && (
+            <span className="text-xs text-muted-foreground/50 font-mono">{currency}</span>
           )}
-        >
-          {value}
-        </span>
+          <span
+            className={cn(
+              "font-mono text-sm font-semibold",
+              positive === true
+                ? "text-emerald-400"
+                : positive === false
+                ? "text-rose-400"
+                : "text-foreground"
+            )}
+          >
+            {value}
+          </span>
+        </div>
         {sub && (
           <p className="text-xs text-muted-foreground mt-0.5">{sub}</p>
         )}
@@ -160,25 +167,13 @@ export default async function ResumenPage() {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <KpiRow label="Ingresos totales" value={formatCLP(chileIngresos)} positive={true} />
-            <KpiRow label="Gastos totales" value={formatCLP(chileGastos)} positive={false} />
-            <KpiRow
-              label="Saldo neto"
-              value={formatCLP(chileSaldo)}
-              positive={chileSaldo >= 0}
-            />
+            <KpiRow label="Ingresos totales" value={formatCLP(chileIngresos)} positive={true} currency="CLP" />
+            <KpiRow label="Gastos totales" value={formatCLP(chileGastos)} positive={false} currency="CLP" />
+            <KpiRow label="Saldo neto" value={formatCLP(chileSaldo)} positive={chileSaldo >= 0} currency="CLP" />
             {lastChile && (
               <>
-                <KpiRow
-                  label={`Ingresos ${lastChile.month}`}
-                  value={formatCLP(lastChile.ingresos)}
-                  positive={true}
-                />
-                <KpiRow
-                  label={`Gastos ${lastChile.month}`}
-                  value={formatCLP(lastChile.gastos)}
-                  positive={false}
-                />
+                <KpiRow label={`Ingresos ${lastChile.month}`} value={formatCLP(lastChile.ingresos)} positive={true} currency="CLP" />
+                <KpiRow label={`Gastos ${lastChile.month}`} value={formatCLP(lastChile.gastos)} positive={false} currency="CLP" />
               </>
             )}
           </CardContent>
@@ -193,22 +188,11 @@ export default async function ResumenPage() {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <KpiRow label="Ingresos totales" value={formatCOP(colIngresos)} positive={true} />
-            <KpiRow label="Gastos totales" value={formatCOP(colGastos)} positive={false} />
-            <KpiRow
-              label="Saldo neto"
-              value={formatCOP(colSaldo)}
-              positive={colSaldo >= 0}
-            />
-            <KpiRow
-              label="Inversión busetas"
-              value={formatCOP(colombia.investmentSummary.totalInvertido)}
-            />
-            <KpiRow
-              label="Recuperado"
-              value={`${colombia.investmentSummary.porcentajeRecuperacion.toFixed(1)}%`}
-              positive={colombia.investmentSummary.porcentajeRecuperacion > 50}
-            />
+            <KpiRow label="Ingresos totales" value={formatCOP(colIngresos)} positive={true} currency="COP" />
+            <KpiRow label="Gastos totales" value={formatCOP(colGastos)} positive={false} currency="COP" />
+            <KpiRow label="Saldo neto" value={formatCOP(colSaldo)} positive={colSaldo >= 0} currency="COP" />
+            <KpiRow label="Inversión busetas" value={formatCOP(colombia.investmentSummary.totalInvertido)} currency="COP" />
+            <KpiRow label="Recuperado" value={`${colombia.investmentSummary.porcentajeRecuperacion.toFixed(1)}%`} positive={colombia.investmentSummary.porcentajeRecuperacion > 50} />
           </CardContent>
         </Card>
 
@@ -221,22 +205,10 @@ export default async function ResumenPage() {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <KpiRow label="Total invertido" value={formatUSD(portafolio.resumen.inversionTotal)} />
-            <KpiRow
-              label="Valor actual"
-              value={formatUSD(portafolio.resumen.valorActual)}
-              positive={portafolio.resumen.ganancia >= 0}
-            />
-            <KpiRow
-              label="Ganancia / Pérdida"
-              value={formatUSD(portafolio.resumen.ganancia)}
-              positive={portafolio.resumen.ganancia >= 0}
-            />
-            <KpiRow
-              label="Rendimiento"
-              value={formatPercent(portafolio.resumen.gananciaPercent)}
-              positive={portafolio.resumen.gananciaPercent >= 0}
-            />
+            <KpiRow label="Total invertido" value={formatUSD(portafolio.resumen.inversionTotal)} currency="USD" />
+            <KpiRow label="Valor actual" value={formatUSD(portafolio.resumen.valorActual)} positive={portafolio.resumen.ganancia >= 0} currency="USD" />
+            <KpiRow label="Ganancia / Pérdida" value={formatUSD(portafolio.resumen.ganancia)} positive={portafolio.resumen.ganancia >= 0} currency="USD" />
+            <KpiRow label="Rendimiento" value={formatPercent(portafolio.resumen.gananciaPercent)} positive={portafolio.resumen.gananciaPercent >= 0} />
             {["GOOG", "BTC"].map((etf) => {
               const entries = portafolio.entries.filter((e) => e.etf === etf);
               const pct =
@@ -272,24 +244,11 @@ export default async function ResumenPage() {
               sub={`${formatCOP(apartamento.totalAportado)} de ${formatCOP(apartamento.valorTotal)}`}
               positive={aptPercent >= 50}
             />
-            <KpiRow
-              label="Saldo pendiente apt."
-              value={formatCOP(apartamento.saldoPendiente)}
-              positive={false}
-            />
+            <KpiRow label="Saldo pendiente apt." value={formatCOP(apartamento.saldoPendiente)} positive={false} currency="COP" />
             {mesesRestantes !== null && (
-              <KpiRow
-                label="Est. llegada a meta"
-                value={`${mesesRestantes} meses`}
-                sub={`Ritmo promedio ${formatCOP(Math.round(ritmo))}/mes`}
-              />
+              <KpiRow label="Est. llegada a meta" value={`${mesesRestantes} meses`} sub={`Ritmo promedio ${formatCOP(Math.round(ritmo))}/mes`} />
             )}
-            <KpiRow
-              label="Préstamos pendientes"
-              value={formatCOP(totalPrestamos)}
-              sub={`${prestamosActivos} persona${prestamosActivos !== 1 ? "s" : ""} con saldo activo`}
-              positive={false}
-            />
+            <KpiRow label="Préstamos pendientes" value={formatCOP(totalPrestamos)} sub={`${prestamosActivos} persona${prestamosActivos !== 1 ? "s" : ""} con saldo activo`} positive={false} currency="COP" />
           </CardContent>
         </Card>
       </div>
@@ -318,16 +277,16 @@ export default async function ResumenPage() {
               <p className="text-xs text-muted-foreground uppercase tracking-wide mb-3">
                 Activos
               </p>
-              <KpiRow label="Saldo Caja Chile" value={formatCLP(chileSaldo)} positive={chileSaldo >= 0} />
-              <KpiRow label="Saldo Caja Colombia" value={formatCOP(colSaldo)} positive={colSaldo >= 0} />
-              <KpiRow label="Portafolio" value={formatUSD(portafolio.resumen.valorActual)} positive={true} />
+              <KpiRow label="Saldo Caja Chile" value={formatCLP(chileSaldo)} positive={chileSaldo >= 0} currency="CLP" />
+              <KpiRow label="Saldo Caja Colombia" value={formatCOP(colSaldo)} positive={colSaldo >= 0} currency="COP" />
+              <KpiRow label="Portafolio" value={formatUSD(portafolio.resumen.valorActual)} positive={true} currency="USD" />
             </div>
             <div>
               <p className="text-xs text-muted-foreground uppercase tracking-wide mb-3">
                 Pasivos
               </p>
-              <KpiRow label="Préstamos pendientes" value={formatCOP(totalPrestamos)} positive={false} />
-              <KpiRow label="Deuda apartamento" value={formatCOP(apartamento.saldoPendiente)} positive={false} />
+              <KpiRow label="Préstamos pendientes" value={formatCOP(totalPrestamos)} positive={false} currency="COP" />
+              <KpiRow label="Deuda apartamento" value={formatCOP(apartamento.saldoPendiente)} positive={false} currency="COP" />
             </div>
           </div>
         </CardContent>

@@ -55,6 +55,28 @@ export default async function CajaColombiaPage() {
       ? deltaPct(lastMonth.saldo, prevMonth.saldo)
       : undefined;
 
+  // Mes actual — Colombia usa DD/MM (sin año) o DD/MM/YYYY
+  const mesActualTx = transactions.filter((t) => {
+    const sep = t.fecha.includes("/") ? "/" : "-";
+    const parts = t.fecha.split(sep);
+    if (parts.length === 2) {
+      // DD/MM — inferir año actual
+      return `${now.getFullYear()}-${parts[1].padStart(2, "0")}` === currentMonthKey;
+    }
+    if (parts.length === 3) {
+      if (parts[0].length === 4) {
+        return `${parts[0]}-${parts[1].padStart(2, "0")}` === currentMonthKey;
+      }
+      return `${parts[2]}-${parts[1].padStart(2, "0")}` === currentMonthKey;
+    }
+    return false;
+  });
+  const mesIngresos = mesActualTx.reduce((s, t) => s + t.ingreso, 0);
+  const mesGastos = mesActualTx.reduce((s, t) => s + t.gasto, 0);
+  const mesSaldo = mesIngresos - mesGastos;
+  const mesLabel = now.toLocaleDateString("es-CO", { month: "long" });
+  const hasMesActual = mesActualTx.length > 0;
+
   return (
     <div className="space-y-8">
       <div>
@@ -68,25 +90,28 @@ export default async function CajaColombiaPage() {
 
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <DashboardCard
-          title="Total Ingresos"
-          value={formatCOP(totalIngresos)}
-          subtitle={deltaIngresos}
+          title="Ingresos"
+          value={hasMesActual ? formatCOP(mesIngresos) : formatCOP(totalIngresos)}
+          subtitle={hasMesActual ? `${mesLabel} en curso` : deltaIngresos}
           icon={<FiTrendingUp size={20} />}
           color="emerald"
+          secondary={hasMesActual ? { label: "Total acumulado", value: formatCOP(totalIngresos) } : undefined}
         />
         <DashboardCard
-          title="Total Gastos"
-          value={formatCOP(totalGastos)}
-          subtitle={deltaGastos}
+          title="Gastos"
+          value={hasMesActual ? formatCOP(mesGastos) : formatCOP(totalGastos)}
+          subtitle={hasMesActual ? `${mesLabel} en curso` : deltaGastos}
           icon={<FiTrendingDown size={20} />}
           color="rose"
+          secondary={hasMesActual ? { label: "Total acumulado", value: formatCOP(totalGastos) } : undefined}
         />
         <DashboardCard
           title="Saldo"
-          value={formatCOP(saldo)}
-          subtitle={deltaSaldo}
+          value={hasMesActual ? formatCOP(mesSaldo) : formatCOP(saldo)}
+          subtitle={hasMesActual ? `${mesLabel} en curso` : deltaSaldo}
           icon={<FiGlobe size={20} />}
-          color={saldo >= 0 ? "blue" : "rose"}
+          color={hasMesActual ? (mesSaldo >= 0 ? "blue" : "rose") : (saldo >= 0 ? "blue" : "rose")}
+          secondary={hasMesActual ? { label: "Total acumulado", value: formatCOP(saldo) } : undefined}
         />
         <DashboardCard
           title="Inversión Busetas"

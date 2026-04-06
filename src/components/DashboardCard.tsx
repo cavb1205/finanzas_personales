@@ -17,6 +17,7 @@ interface Props {
   icon: ReactNode;
   trend?: "up" | "down" | "neutral";
   color?: "emerald" | "blue" | "amber" | "rose" | "indigo" | "purple";
+  secondary?: { label: string; value: string };
 }
 
 const colorMap: Record<string, string> = {
@@ -35,6 +36,7 @@ export default function DashboardCard({
   tooltip,
   icon,
   color = "emerald",
+  secondary,
 }: Props) {
   return (
     <Card>
@@ -60,6 +62,17 @@ export default function DashboardCard({
         </p>
         {subtitle && (
           <p className="mt-1 text-xs text-muted-foreground truncate">{subtitle}</p>
+        )}
+        {secondary && (
+          <>
+            <div className="my-3 h-px bg-border" />
+            <div className="flex items-center justify-between">
+              <p className="text-xs text-muted-foreground">{secondary.label}</p>
+              <p className={cn("text-sm font-bold font-mono", colorMap[color])}>
+                {secondary.value}
+              </p>
+            </div>
+          </>
         )}
       </CardContent>
     </Card>

@@ -2,15 +2,13 @@ import { FiUsers, FiAlertCircle, FiCheckCircle } from "react-icons/fi";
 import DashboardCard from "@/components/DashboardCard";
 import EmptyState from "@/components/EmptyState";
 import PrestamosDetalle from "./PrestamosDetalle";
+import HistorialPrestamos from "./HistorialPrestamos";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { getPrestamos } from "@/lib/sheets";
 import { formatCOP } from "@/lib/format";
 import { Separator } from "@/components/ui/separator";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import {
-  Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
-} from "@/components/ui/table";
 import { cn } from "@/lib/utils";
 
 export const revalidate = 300;
@@ -122,51 +120,8 @@ export default async function PrestamosPage() {
         </TabsContent>
 
         {/* Historial completo */}
-        <TabsContent value="historial" className="mt-6 space-y-3">
-          <h2 className="text-lg font-semibold">Historial completo</h2>
-          <div className="rounded-lg border border-border overflow-hidden">
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Fecha</TableHead>
-                  <TableHead>Persona</TableHead>
-                  <TableHead>Operación</TableHead>
-                  <TableHead className="text-right">Monto</TableHead>
-                  <TableHead>Notas</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {movimientos.length === 0 && (
-                  <TableRow>
-                    <TableCell colSpan={5} className="py-0">
-                      <EmptyState title="Sin movimientos" description="No hay movimientos registrados." />
-                    </TableCell>
-                  </TableRow>
-                )}
-                {movimientos.map((m, i) => (
-                  <TableRow key={i}>
-                    <TableCell className="font-mono text-xs text-muted-foreground">{m.fecha}</TableCell>
-                    <TableCell className="font-medium text-sm">{m.persona}</TableCell>
-                    <TableCell>
-                      <Badge
-                        variant="outline"
-                        className={cn(
-                          "text-xs",
-                          m.operacion.includes("PRÉSTAMO") || m.operacion.includes("PRESTAMO")
-                            ? "border-rose-500/30 text-rose-400"
-                            : "border-emerald-500/30 text-emerald-400"
-                        )}
-                      >
-                        {m.operacion}
-                      </Badge>
-                    </TableCell>
-                    <TableCell className="text-right font-mono text-xs">{formatCOP(m.monto)}</TableCell>
-                    <TableCell className="text-xs text-muted-foreground">{m.observaciones}</TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          </div>
+        <TabsContent value="historial" className="mt-6">
+          <HistorialPrestamos movimientos={movimientos} resumen={resumen} />
         </TabsContent>
       </Tabs>
     </div>

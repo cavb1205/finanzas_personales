@@ -3,6 +3,24 @@
 import { useState } from "react";
 import type { InvestmentEntry } from "@/lib/sheets";
 import { formatUSD, formatPercent } from "@/lib/format";
+
+function diasDesde(fechaStr: string): number | null {
+  const sep = fechaStr.includes("/") ? "/" : "-";
+  const parts = fechaStr.split(sep);
+  if (parts.length !== 3) return null;
+  const [d, m, y] = parts;
+  const date = new Date(Number(y), Number(m) - 1, Number(d));
+  if (isNaN(date.getTime())) return null;
+  return Math.floor((Date.now() - date.getTime()) / (1000 * 60 * 60 * 24));
+}
+
+function tenenciaLabel(dias: number): string {
+  if (dias < 30) return `${dias}d`;
+  if (dias < 365) return `${Math.floor(dias / 30)}m`;
+  const y = Math.floor(dias / 365);
+  const m = Math.floor((dias % 365) / 30);
+  return m > 0 ? `${y}a ${m}m` : `${y}a`;
+}
 import {
   Select,
   SelectContent,
@@ -69,7 +87,8 @@ export default function PortafolioTable({
           <TableHeader>
             <TableRow>
               <TableHead>Activo</TableHead>
-              <TableHead>Fecha</TableHead>
+              <TableHead>Compra</TableHead>
+              <TableHead className="text-right">Tenencia</TableHead>
               <TableHead className="text-right">Cantidad</TableHead>
               <TableHead className="text-right">P. Compra</TableHead>
               <TableHead className="text-right">Inversión</TableHead>
@@ -82,8 +101,16 @@ export default function PortafolioTable({
             {paginated.map((e, i) => (
               <TableRow key={i}>
                 <TableCell className="font-medium">{e.etf}</TableCell>
-                <TableCell className="font-mono text-xs text-muted-foreground">
-                  {e.fechaCompra}
+                <TableCell>
+                  <p className="font-mono text-xs font-semibold">{e.fechaCompra}</p>
+                </TableCell>
+                <TableCell className="text-right">
+                  {(() => {
+                    const dias = diasDesde(e.fechaCompra);
+                    return dias !== null ? (
+                      <span className="font-mono text-xs text-muted-foreground">{tenenciaLabel(dias)}</span>
+                    ) : <span className="text-muted-foreground">—</span>;
+                  })()}
                 </TableCell>
                 <TableCell className="text-right font-mono text-xs">
                   {e.cantidad.toFixed(5)}
