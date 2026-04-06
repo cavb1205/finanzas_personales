@@ -109,7 +109,7 @@ export default function RankingSection({
       <div className="flex items-center gap-3">
         <h2 className="text-lg font-semibold">Distribución por mes</h2>
         <Select value={selectedMonth} onValueChange={(v) => v && setSelectedMonth(v)}>
-          <SelectTrigger className="w-44">
+          <SelectTrigger className="w-full sm:w-44">
             <SelectValue />
           </SelectTrigger>
           <SelectContent>

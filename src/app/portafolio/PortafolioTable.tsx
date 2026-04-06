@@ -69,7 +69,7 @@ export default function PortafolioTable({
           goTo(1);
         }}
       >
-        <SelectTrigger className="w-40">
+        <SelectTrigger className="w-full sm:w-40">
           <SelectValue />
         </SelectTrigger>
         <SelectContent>
@@ -82,17 +82,17 @@ export default function PortafolioTable({
         </SelectContent>
       </Select>
 
-      <div className="rounded-lg border border-border overflow-hidden">
+      <div className="rounded-lg border border-border overflow-x-auto">
         <Table>
           <TableHeader>
             <TableRow>
               <TableHead>Activo</TableHead>
-              <TableHead>Compra</TableHead>
-              <TableHead className="text-right">Tenencia</TableHead>
+              <TableHead className="hidden sm:table-cell">Compra</TableHead>
+              <TableHead className="hidden sm:table-cell text-right">Tenencia</TableHead>
               <TableHead className="text-right">Cantidad</TableHead>
-              <TableHead className="text-right">P. Compra</TableHead>
+              <TableHead className="hidden md:table-cell text-right">P. Compra</TableHead>
               <TableHead className="text-right">Inversión</TableHead>
-              <TableHead className="text-right">P. Actual</TableHead>
+              <TableHead className="hidden md:table-cell text-right">P. Actual</TableHead>
               <TableHead className="text-right">Valor</TableHead>
               <TableHead className="text-right">G/P</TableHead>
             </TableRow>
@@ -101,10 +101,10 @@ export default function PortafolioTable({
             {paginated.map((e, i) => (
               <TableRow key={i}>
                 <TableCell className="font-medium">{e.etf}</TableCell>
-                <TableCell>
+                <TableCell className="hidden sm:table-cell">
                   <p className="font-mono text-xs font-semibold">{e.fechaCompra}</p>
                 </TableCell>
-                <TableCell className="text-right">
+                <TableCell className="hidden sm:table-cell text-right">
                   {(() => {
                     const dias = diasDesde(e.fechaCompra);
                     return dias !== null ? (
@@ -115,13 +115,13 @@ export default function PortafolioTable({
                 <TableCell className="text-right font-mono text-xs">
                   {e.cantidad.toFixed(5)}
                 </TableCell>
-                <TableCell className="text-right font-mono text-xs">
+                <TableCell className="hidden md:table-cell text-right font-mono text-xs">
                   {formatUSD(e.precioCompra)}
                 </TableCell>
                 <TableCell className="text-right font-mono text-xs">
                   {formatUSD(e.inversionInicial)}
                 </TableCell>
-                <TableCell className="text-right font-mono text-xs">
+                <TableCell className="hidden md:table-cell text-right font-mono text-xs">
                   {formatUSD(e.precioActual)}
                 </TableCell>
                 <TableCell className="text-right font-mono text-xs font-medium">

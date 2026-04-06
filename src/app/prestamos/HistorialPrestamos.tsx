@@ -35,7 +35,7 @@ export default function HistorialPrestamos({ movimientos, resumen }: Props) {
       <div className="flex items-center gap-3">
         <h2 className="text-lg font-semibold">Historial completo</h2>
         <Select value={persona} onValueChange={(v) => { if (v) setPersona(v); }}>
-          <SelectTrigger className="w-44 h-8 text-sm">
+          <SelectTrigger className="w-full sm:w-44 h-8 text-sm">
             <SelectValue />
           </SelectTrigger>
           <SelectContent>
@@ -50,15 +50,15 @@ export default function HistorialPrestamos({ movimientos, resumen }: Props) {
         </span>
       </div>
 
-      <div className="rounded-lg border border-border overflow-hidden">
+      <div className="rounded-lg border border-border overflow-x-auto">
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead>Fecha</TableHead>
+              <TableHead className="whitespace-nowrap">Fecha</TableHead>
               <TableHead>Persona</TableHead>
               <TableHead>Operación</TableHead>
               <TableHead className="text-right">Monto</TableHead>
-              <TableHead>Notas</TableHead>
+              <TableHead className="hidden lg:table-cell">Notas</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -82,7 +82,7 @@ export default function HistorialPrestamos({ movimientos, resumen }: Props) {
                       <Badge
                         variant="outline"
                         className={cn(
-                          "text-xs",
+                          "text-xs whitespace-nowrap",
                           esPrestamo
                             ? "border-rose-500/30 text-rose-400"
                             : "border-emerald-500/30 text-emerald-400"
@@ -92,12 +92,12 @@ export default function HistorialPrestamos({ movimientos, resumen }: Props) {
                       </Badge>
                     </TableCell>
                     <TableCell className={cn(
-                      "text-right font-mono text-xs font-semibold",
+                      "text-right font-mono text-xs font-semibold whitespace-nowrap",
                       esPrestamo ? "text-rose-400" : "text-emerald-400"
                     )}>
                       {esPrestamo ? "-" : "+"}{formatCOP(m.monto)}
                     </TableCell>
-                    <TableCell className="text-xs text-muted-foreground">{m.observaciones}</TableCell>
+                    <TableCell className="hidden lg:table-cell text-xs text-muted-foreground">{m.observaciones}</TableCell>
                   </TableRow>
                 );
               })

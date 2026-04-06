@@ -19,16 +19,16 @@ export default function BusetasTable({ entries }: { entries: BusetaEntry[] }) {
 
   return (
     <div className="space-y-4">
-      <div className="rounded-lg border border-border overflow-hidden">
+      <div className="rounded-lg border border-border overflow-x-auto">
         <Table>
           <TableHeader>
             <TableRow>
               <TableHead>Fecha</TableHead>
               <TableHead>Buseta</TableHead>
-              <TableHead>Ruta</TableHead>
-              <TableHead className="text-right">Pasajeros</TableHead>
-              <TableHead className="text-right">Bruto</TableHead>
-              <TableHead className="text-right">ACPM</TableHead>
+              <TableHead className="hidden sm:table-cell">Ruta</TableHead>
+              <TableHead className="hidden md:table-cell text-right">Pasajeros</TableHead>
+              <TableHead className="hidden sm:table-cell text-right">Bruto</TableHead>
+              <TableHead className="hidden md:table-cell text-right">ACPM</TableHead>
               <TableHead className="text-right">Gastos</TableHead>
               <TableHead className="text-right">Neto</TableHead>
             </TableRow>
@@ -40,14 +40,14 @@ export default function BusetasTable({ entries }: { entries: BusetaEntry[] }) {
                   {e.fecha}
                 </TableCell>
                 <TableCell className="text-sm">{e.buseta}</TableCell>
-                <TableCell className="text-sm text-muted-foreground">{e.ruta}</TableCell>
-                <TableCell className="text-right font-mono text-sm">
+                <TableCell className="hidden sm:table-cell text-sm text-muted-foreground">{e.ruta}</TableCell>
+                <TableCell className="hidden md:table-cell text-right font-mono text-sm">
                   {e.pasajeros || "—"}
                 </TableCell>
-                <TableCell className="text-right font-mono text-xs">
+                <TableCell className="hidden sm:table-cell text-right font-mono text-xs">
                   {e.brutoTotal > 0 ? formatCOP(e.brutoTotal) : "—"}
                 </TableCell>
-                <TableCell className="text-right font-mono text-xs text-rose-400">
+                <TableCell className="hidden md:table-cell text-right font-mono text-xs text-rose-400">
                   {e.acpm > 0 ? formatCOP(e.acpm) : "—"}
                 </TableCell>
                 <TableCell className="text-right font-mono text-xs text-rose-400">

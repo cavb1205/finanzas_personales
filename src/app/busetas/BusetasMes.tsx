@@ -111,7 +111,7 @@ export default function BusetasMes({ entries }: Props) {
       {/* Filters */}
       <div className="flex flex-wrap items-center gap-3">
         <Select value={selectedMonth} onValueChange={(v) => { if (v) { setSelectedMonth(v); setSelectedBuseta("all"); } }}>
-          <SelectTrigger className="w-52">
+          <SelectTrigger className="w-full sm:w-52">
             <SelectValue />
           </SelectTrigger>
           <SelectContent>
@@ -122,7 +122,7 @@ export default function BusetasMes({ entries }: Props) {
         </Select>
         {busetas.length > 1 && (
           <Select value={selectedBuseta} onValueChange={(v) => { if (v) setSelectedBuseta(v); }}>
-            <SelectTrigger className="w-44">
+            <SelectTrigger className="w-full sm:w-44">
               <SelectValue placeholder="Todas las busetas" />
             </SelectTrigger>
             <SelectContent>
@@ -168,7 +168,7 @@ export default function BusetasMes({ entries }: Props) {
 
           {/* Desglose de gastos del mes */}
           {filtered.some((e) => e.acpm + e.basico + e.varios + e.montajeLlanta + e.otros > 0) && (
-            <div className="grid gap-3 sm:grid-cols-5">
+            <div className="grid gap-3 grid-cols-2 sm:grid-cols-3 lg:grid-cols-5">
               {[
                 { label: "ACPM", value: filtered.reduce((s, e) => s + e.acpm, 0) },
                 { label: "Básico", value: filtered.reduce((s, e) => s + e.basico, 0) },

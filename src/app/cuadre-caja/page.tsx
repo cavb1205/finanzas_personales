@@ -98,21 +98,21 @@ export default async function CuadreCajaPage() {
             </CardHeader>
             <CardContent className="space-y-0 divide-y divide-border">
               {/* Column header */}
-              <div className="grid grid-cols-4 gap-2 pb-2 text-xs text-muted-foreground">
-                <span className="col-span-1">Ruta</span>
-                <span className="text-right">Caja Sistema</span>
-                <span className="text-right">Caja Efectivo</span>
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 pb-2 text-xs text-muted-foreground">
+                <span>Ruta</span>
+                <span className="hidden sm:block text-right">Caja Sistema</span>
+                <span className="hidden sm:block text-right">Caja Efectivo</span>
                 <span className="text-right">Diferencia</span>
               </div>
               {terminales.map((t) => {
                 const diff = t.caja - t.sistema;
                 return (
-                  <div key={t.nombre} className="grid grid-cols-4 items-center gap-2 py-3">
-                    <span className="font-medium text-sm col-span-1">{t.nombre}</span>
-                    <span className="font-mono text-sm text-right text-muted-foreground">
+                  <div key={t.nombre} className="grid grid-cols-2 sm:grid-cols-4 items-center gap-2 py-3">
+                    <span className="font-medium text-sm">{t.nombre}</span>
+                    <span className="hidden sm:block font-mono text-sm text-right text-muted-foreground">
                       {formatCLP(t.sistema)}
                     </span>
-                    <span className="font-mono text-sm text-right">
+                    <span className="hidden sm:block font-mono text-sm text-right">
                       {formatCLP(t.caja)}
                     </span>
                     <span
@@ -132,12 +132,12 @@ export default async function CuadreCajaPage() {
                 );
               })}
               {/* Totals row */}
-              <div className="grid grid-cols-4 items-center gap-2 pt-3">
-                <span className="text-xs text-muted-foreground font-semibold col-span-1">Total</span>
-                <span className="font-mono text-sm font-semibold text-right text-blue-400">
+              <div className="grid grid-cols-2 sm:grid-cols-4 items-center gap-2 pt-3">
+                <span className="text-xs text-muted-foreground font-semibold">Total</span>
+                <span className="hidden sm:block font-mono text-sm font-semibold text-right text-blue-400">
                   {formatCLP(terminales.reduce((s, t) => s + t.sistema, 0))}
                 </span>
-                <span className="font-mono text-sm font-semibold text-right text-emerald-400">
+                <span className="hidden sm:block font-mono text-sm font-semibold text-right text-emerald-400">
                   {formatCLP(terminales.reduce((s, t) => s + t.caja, 0))}
                 </span>
                 <span

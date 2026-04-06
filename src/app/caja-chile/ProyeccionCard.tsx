@@ -43,7 +43,7 @@ export default function ProyeccionCard({ summary, currentMonthKey }: Props) {
   return (
     <Card className="border-amber-500/30 bg-amber-500/5">
       <CardContent className="pt-5">
-        <div className="flex items-center justify-between gap-2 mb-3">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-1 sm:gap-2 mb-3">
           <div className="flex items-center gap-2">
             <FiTarget className="text-amber-400" size={16} />
             <p className="text-sm font-semibold text-amber-400">
@@ -77,20 +77,20 @@ export default function ProyeccionCard({ summary, currentMonthKey }: Props) {
         <div className="grid grid-cols-3 gap-3 text-center">
           <div>
             <p className="text-xs text-muted-foreground mb-1">Ingresos est.</p>
-            <p className="font-mono text-sm font-bold text-emerald-400">
+            <p className="font-mono text-xs sm:text-sm font-bold text-emerald-400">
               {formatCLP(projIngresos)}
             </p>
           </div>
           <div>
             <p className="text-xs text-muted-foreground mb-1">Gastos est.</p>
-            <p className="font-mono text-sm font-bold text-rose-400">
+            <p className="font-mono text-xs sm:text-sm font-bold text-rose-400">
               {formatCLP(projGastos)}
             </p>
           </div>
           <div>
             <p className="text-xs text-muted-foreground mb-1">Saldo est.</p>
             <p
-              className={`font-mono text-sm font-bold ${
+              className={`font-mono text-xs sm:text-sm font-bold ${
                 projSaldo >= 0 ? "text-emerald-400" : "text-rose-400"
               }`}
             >

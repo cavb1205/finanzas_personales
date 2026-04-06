@@ -120,7 +120,7 @@ export default function TransactionTable({
           className="sm:max-w-xs"
         />
         <Select value={monthFilter} onValueChange={(v) => { if (v) { setMonthFilter(v); goTo(1); } }}>
-          <SelectTrigger className="sm:w-44">
+          <SelectTrigger className="w-full sm:w-44">
             <SelectValue placeholder="Mes" />
           </SelectTrigger>
           <SelectContent>
@@ -131,7 +131,7 @@ export default function TransactionTable({
           </SelectContent>
         </Select>
         <Select value={categoryFilter} onValueChange={(v) => { if (v) { setCategoryFilter(v); goTo(1); } }}>
-          <SelectTrigger className="sm:w-44">
+          <SelectTrigger className="w-full sm:w-44">
             <SelectValue placeholder="Categoría" />
           </SelectTrigger>
           <SelectContent>
@@ -160,12 +160,12 @@ export default function TransactionTable({
       </p>
 
       {/* Table */}
-      <div className="rounded-lg border border-border overflow-hidden">
+      <div className="rounded-lg border border-border overflow-x-auto">
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead>Fecha</TableHead>
-              <TableHead>Categoría</TableHead>
+              <TableHead className="whitespace-nowrap">Fecha</TableHead>
+              <TableHead className="hidden sm:table-cell">Categoría</TableHead>
               <TableHead>Descripción</TableHead>
               <TableHead className="text-right">Ingreso</TableHead>
               <TableHead className="text-right">Gasto</TableHead>
@@ -187,7 +187,7 @@ export default function TransactionTable({
                   <TableCell className="font-mono text-xs text-muted-foreground whitespace-nowrap">
                     {t.fecha}
                   </TableCell>
-                  <TableCell>
+                  <TableCell className="hidden sm:table-cell">
                     <span className={cn(
                       "inline-flex items-center rounded-full border px-2 py-0.5 text-xs font-medium",
                       categoryVariant[normCat(t.categoria)] ?? "bg-muted text-muted-foreground border-border"
@@ -195,11 +195,20 @@ export default function TransactionTable({
                       {t.categoria}
                     </span>
                   </TableCell>
-                  <TableCell className="text-sm">{t.descripcion}</TableCell>
-                  <TableCell className="text-right font-mono text-sm text-emerald-400">
+                  <TableCell className="text-sm max-w-[140px] sm:max-w-none truncate">
+                    <span className="block truncate">{t.descripcion}</span>
+                    {/* Categoría badge visible solo en mobile, bajo la descripción */}
+                    <span className={cn(
+                      "sm:hidden inline-flex items-center rounded-full border px-1.5 py-0.5 text-xs font-medium mt-1",
+                      categoryVariant[normCat(t.categoria)] ?? "bg-muted text-muted-foreground border-border"
+                    )}>
+                      {t.categoria}
+                    </span>
+                  </TableCell>
+                  <TableCell className="text-right font-mono text-xs text-emerald-400 whitespace-nowrap">
                     {t.ingreso > 0 ? format(t.ingreso) : ""}
                   </TableCell>
-                  <TableCell className="text-right font-mono text-sm text-rose-400">
+                  <TableCell className="text-right font-mono text-xs text-rose-400 whitespace-nowrap">
                     {t.gasto > 0 ? format(t.gasto) : ""}
                   </TableCell>
                 </TableRow>

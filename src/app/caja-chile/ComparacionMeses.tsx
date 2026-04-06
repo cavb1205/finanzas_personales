@@ -45,16 +45,28 @@ function Row({
   type: RowType;
 }) {
   return (
-    <div className="grid grid-cols-4 items-center py-2.5 border-b border-border last:border-0 gap-2">
-      <span className="text-sm text-muted-foreground col-span-1">{label}</span>
-      <span className={cn("font-mono text-sm font-semibold text-right", rowColor(type, a))}>
-        {formatCLP(a)}
-      </span>
-      <span className={cn("font-mono text-sm font-semibold text-right", rowColor(type, b))}>
-        {formatCLP(b)}
-      </span>
-      <div className="text-right">
+    <div className="py-2.5 border-b border-border last:border-0">
+      {/* Mobile: stacked */}
+      <div className="flex items-center justify-between sm:hidden gap-2">
+        <span className="text-sm text-muted-foreground">{label}</span>
         <Delta current={a} previous={b} />
+      </div>
+      <div className="flex items-center justify-between sm:hidden gap-4 mt-1">
+        <span className={cn("font-mono text-xs font-semibold", rowColor(type, a))}>{formatCLP(a)}</span>
+        <span className={cn("font-mono text-xs font-semibold text-muted-foreground", rowColor(type, b))}>{formatCLP(b)}</span>
+      </div>
+      {/* Desktop: 4 columns */}
+      <div className="hidden sm:grid grid-cols-4 items-center gap-2">
+        <span className="text-sm text-muted-foreground col-span-1">{label}</span>
+        <span className={cn("font-mono text-sm font-semibold text-right", rowColor(type, a))}>
+          {formatCLP(a)}
+        </span>
+        <span className={cn("font-mono text-sm font-semibold text-right", rowColor(type, b))}>
+          {formatCLP(b)}
+        </span>
+        <div className="text-right">
+          <Delta current={a} previous={b} />
+        </div>
       </div>
     </div>
   );
@@ -84,7 +96,7 @@ export default function ComparacionMeses({ summary }: Props) {
           <div className="flex items-center gap-2">
             <span className="text-xs text-muted-foreground w-4">A</span>
             <Select value={mesA} onValueChange={(v) => v && setMesA(v)}>
-              <SelectTrigger className="w-44 h-8 text-sm">
+              <SelectTrigger className="w-full sm:w-44 h-8 text-sm">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
@@ -97,7 +109,7 @@ export default function ComparacionMeses({ summary }: Props) {
           <div className="flex items-center gap-2">
             <span className="text-xs text-muted-foreground w-4">B</span>
             <Select value={mesB} onValueChange={(v) => v && setMesB(v)}>
-              <SelectTrigger className="w-44 h-8 text-sm">
+              <SelectTrigger className="w-full sm:w-44 h-8 text-sm">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
@@ -112,12 +124,17 @@ export default function ComparacionMeses({ summary }: Props) {
       <CardContent>
         {dataA && dataB ? (
           <>
-            {/* Header */}
-            <div className="grid grid-cols-4 gap-2 mb-1">
+            {/* Header — only on sm+ */}
+            <div className="hidden sm:grid grid-cols-4 gap-2 mb-1">
               <span />
               <span className="text-xs text-muted-foreground text-right font-medium">{formatMonthOption(mesA)}</span>
               <span className="text-xs text-muted-foreground text-right font-medium">{formatMonthOption(mesB)}</span>
               <span className="text-xs text-muted-foreground text-right">Δ A vs B</span>
+            </div>
+            {/* Mobile header */}
+            <div className="sm:hidden flex justify-between text-xs text-muted-foreground mb-2">
+              <span>{formatMonthOption(mesA)}</span>
+              <span>{formatMonthOption(mesB)}</span>
             </div>
             <Row label="Ingresos" a={dataA.ingresos} b={dataB.ingresos} type="ingreso" />
             <Row label="Gastos"   a={dataA.gastos}   b={dataB.gastos}   type="gasto" />
