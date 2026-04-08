@@ -33,6 +33,18 @@ function todayDDMMYYYY(): string {
   return `${String(d.getDate()).padStart(2, "0")}/${String(d.getMonth() + 1).padStart(2, "0")}/${d.getFullYear()}`;
 }
 
+function toInputDate(ddmmyyyy: string): string {
+  const [dd, mm, yyyy] = ddmmyyyy.split("/");
+  if (!dd || !mm || !yyyy) return "";
+  return `${yyyy}-${mm}-${dd}`;
+}
+
+function fromInputDate(yyyymmdd: string): string {
+  const [yyyy, mm, dd] = yyyymmdd.split("-");
+  if (!dd || !mm || !yyyy) return "";
+  return `${dd}/${mm}/${yyyy}`;
+}
+
 function entryToFingerprint(e: InvestmentEntry): string {
   return rowFingerprint([
     e.etf, e.nombre, e.fechaCompra,
@@ -56,6 +68,7 @@ export default function PortafolioDrawer({ open, onOpenChange, editRow, onSucces
   }, [open, editRow, reset]);
 
   const etfValue = watch("etf");
+  const fechaCompraValue = watch("fechaCompra");
 
   async function onSubmit(data: PortafolioInput) {
     try {
@@ -101,7 +114,11 @@ export default function PortafolioDrawer({ open, onOpenChange, editRow, onSucces
             </div>
             <div className="space-y-1">
               <label className="text-sm font-medium">Fecha compra</label>
-              <Input placeholder="DD/MM/YYYY" {...register("fechaCompra")} />
+              <Input
+                type="date"
+                value={toInputDate(fechaCompraValue)}
+                onChange={(e) => setValue("fechaCompra", fromInputDate(e.target.value), { shouldValidate: true })}
+              />
               {errors.fechaCompra && <p className="text-xs text-rose-400">{errors.fechaCompra.message}</p>}
             </div>
           </div>

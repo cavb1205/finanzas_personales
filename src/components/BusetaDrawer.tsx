@@ -29,6 +29,18 @@ function todayDDMMYYYY(): string {
   return `${String(d.getDate()).padStart(2, "0")}/${String(d.getMonth() + 1).padStart(2, "0")}/${d.getFullYear()}`;
 }
 
+function toInputDate(ddmmyyyy: string): string {
+  const [dd, mm, yyyy] = ddmmyyyy.split("/");
+  if (!dd || !mm || !yyyy) return "";
+  return `${yyyy}-${mm}-${dd}`;
+}
+
+function fromInputDate(yyyymmdd: string): string {
+  const [yyyy, mm, dd] = yyyymmdd.split("-");
+  if (!dd || !mm || !yyyy) return "";
+  return `${dd}/${mm}/${yyyy}`;
+}
+
 function entryToFingerprint(e: BusetaEntry): string {
   return rowFingerprint([
     e.fecha, e.buseta, e.ruta, "", "",
@@ -59,7 +71,7 @@ function NumberField({ label, name, register, error }: {
 export default function BusetaDrawer({ open, onOpenChange, editRow, onSuccess }: Props) {
   const isEdit = Boolean(editRow);
 
-  const { register, handleSubmit, reset, formState: { errors, isSubmitting } } =
+  const { register, handleSubmit, reset, setValue, watch, formState: { errors, isSubmitting } } =
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     useForm<BusetaInput>({ resolver: zodResolver(busetaSchema) as any, defaultValues: { fecha: todayDDMMYYYY(), buseta: "", ruta: "", pasajeros: 0, precioPasaje: 0, brutoTotal: 0, acpm: 0, basico: 0, varios: 0, montajeLlanta: 0, otros: 0, totalGastos: 0, netoTotal: 0, nota: "" } });
 
@@ -70,6 +82,8 @@ export default function BusetaDrawer({ open, onOpenChange, editRow, onSuccess }:
       reset({ fecha: todayDDMMYYYY(), buseta: "", ruta: "", pasajeros: 0, precioPasaje: 0, brutoTotal: 0, acpm: 0, basico: 0, varios: 0, montajeLlanta: 0, otros: 0, totalGastos: 0, netoTotal: 0, nota: "" });
     }
   }, [open, editRow, reset]);
+
+  const fechaValue = watch("fecha");
 
   async function onSubmit(data: BusetaInput) {
     try {
@@ -106,7 +120,11 @@ export default function BusetaDrawer({ open, onOpenChange, editRow, onSuccess }:
           <div className="grid grid-cols-2 gap-3">
             <div className="space-y-1">
               <label className="text-sm font-medium">Fecha</label>
-              <Input placeholder="DD/MM/YYYY" {...register("fecha")} />
+              <Input
+                type="date"
+                value={toInputDate(fechaValue)}
+                onChange={(e) => setValue("fecha", fromInputDate(e.target.value), { shouldValidate: true })}
+              />
               {errors.fecha && <p className="text-xs text-rose-400">{errors.fecha.message}</p>}
             </div>
             <div className="space-y-1">

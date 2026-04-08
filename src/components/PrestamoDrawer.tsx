@@ -48,6 +48,18 @@ function todayDDMMYYYY(): string {
   return `${dd}/${mm}/${yyyy}`;
 }
 
+function toInputDate(ddmmyyyy: string): string {
+  const [dd, mm, yyyy] = ddmmyyyy.split("/");
+  if (!dd || !mm || !yyyy) return "";
+  return `${yyyy}-${mm}-${dd}`;
+}
+
+function fromInputDate(yyyymmdd: string): string {
+  const [yyyy, mm, dd] = yyyymmdd.split("-");
+  if (!dd || !mm || !yyyy) return "";
+  return `${dd}/${mm}/${yyyy}`;
+}
+
 export default function PrestamoDrawer({ open, onOpenChange, editRow, onSuccess }: Props) {
   const isEdit = Boolean(editRow);
 
@@ -94,6 +106,7 @@ export default function PrestamoDrawer({ open, onOpenChange, editRow, onSuccess 
   }, [open, editRow, reset]);
 
   const monedaValue = watch("moneda");
+  const fechaValue = watch("fecha");
 
   async function onSubmit(data: PrestamoInput) {
     try {
@@ -144,7 +157,11 @@ export default function PrestamoDrawer({ open, onOpenChange, editRow, onSuccess 
         <form onSubmit={handleSubmit(onSubmit)} className="px-4 space-y-4 overflow-y-auto">
           <div className="space-y-1">
             <label className="text-sm font-medium">Fecha</label>
-            <Input placeholder="DD/MM/YYYY" {...register("fecha")} />
+            <Input
+              type="date"
+              value={toInputDate(fechaValue)}
+              onChange={(e) => setValue("fecha", fromInputDate(e.target.value), { shouldValidate: true })}
+            />
             {errors.fecha && <p className="text-xs text-rose-400">{errors.fecha.message}</p>}
           </div>
 

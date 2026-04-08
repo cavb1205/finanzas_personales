@@ -60,6 +60,18 @@ function todayDDMMYYYY(): string {
   return `${dd}/${mm}/${yyyy}`;
 }
 
+function toInputDate(ddmmyyyy: string): string {
+  const [dd, mm, yyyy] = ddmmyyyy.split("/");
+  if (!dd || !mm || !yyyy) return "";
+  return `${yyyy}-${mm}-${dd}`;
+}
+
+function fromInputDate(yyyymmdd: string): string {
+  const [yyyy, mm, dd] = yyyymmdd.split("-");
+  if (!dd || !mm || !yyyy) return "";
+  return `${dd}/${mm}/${yyyy}`;
+}
+
 /** Map a Transaction row (ingreso/gasto columns) to our single-monto form */
 function txToForm(tx: Transaction): FormValues {
   return {
@@ -124,6 +136,7 @@ export default function TransactionDrawer({
   }, [open, editRow, reset]);
 
   const categoriaValue = watch("categoria");
+  const fechaValue = watch("fecha");
   const currencyLabel = currency === "CLP" ? "CLP ($)" : "COP ($)";
 
   async function onSubmit(data: FormValues) {
@@ -178,7 +191,11 @@ export default function TransactionDrawer({
           {/* Fecha */}
           <div className="space-y-1">
             <label className="text-sm font-medium">Fecha</label>
-            <Input placeholder="DD/MM/YYYY" {...register("fecha")} />
+            <Input
+              type="date"
+              value={toInputDate(fechaValue)}
+              onChange={(e) => setValue("fecha", fromInputDate(e.target.value), { shouldValidate: true })}
+            />
             {errors.fecha && (
               <p className="text-xs text-rose-400">{errors.fecha.message}</p>
             )}

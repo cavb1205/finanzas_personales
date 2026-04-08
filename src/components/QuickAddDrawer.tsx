@@ -112,6 +112,20 @@ function todayDDMMYYYY(): string {
   return `${String(d.getDate()).padStart(2, "0")}/${String(d.getMonth() + 1).padStart(2, "0")}/${d.getFullYear()}`;
 }
 
+/** DD/MM/YYYY → YYYY-MM-DD (para input type="date") */
+function toInputDate(ddmmyyyy: string): string {
+  const [dd, mm, yyyy] = ddmmyyyy.split("/");
+  if (!dd || !mm || !yyyy) return "";
+  return `${yyyy}-${mm}-${dd}`;
+}
+
+/** YYYY-MM-DD → DD/MM/YYYY (para guardar en sheet) */
+function fromInputDate(yyyymmdd: string): string {
+  const [yyyy, mm, dd] = yyyymmdd.split("-");
+  if (!dd || !mm || !yyyy) return "";
+  return `${dd}/${mm}/${yyyy}`;
+}
+
 // ---------------------------------------------------------------------------
 // CajaChile form
 // ---------------------------------------------------------------------------
@@ -128,12 +142,17 @@ function CajaChileForm({
     useForm<CajaChileFormValues>({ resolver: zodResolver(cajaChileFormSchema) as any, defaultValues: { fecha: todayDDMMYYYY(), categoria: "Gasto", descripcion: "" } });
 
   const cat = watch("categoria");
+  const fechaVal = watch("fecha");
 
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
       <div className="space-y-1">
         <label className="text-sm font-medium">Fecha</label>
-        <Input placeholder="DD/MM/YYYY" {...register("fecha")} />
+        <Input
+          type="date"
+          value={toInputDate(fechaVal)}
+          onChange={(e) => setValue("fecha", fromInputDate(e.target.value), { shouldValidate: true })}
+        />
         {errors.fecha && <p className="text-xs text-rose-400">{errors.fecha.message}</p>}
       </div>
 
@@ -190,12 +209,17 @@ function CajaColombiaForm({
     useForm<CajaColombiaFormValues>({ resolver: zodResolver(cajaColombiaFormSchema) as any, defaultValues: { fecha: todayDDMMYYYY(), categoria: "Gasto", descripcion: "" } });
 
   const cat = watch("categoria");
+  const fechaVal = watch("fecha");
 
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
       <div className="space-y-1">
         <label className="text-sm font-medium">Fecha</label>
-        <Input placeholder="DD/MM/YYYY" {...register("fecha")} />
+        <Input
+          type="date"
+          value={toInputDate(fechaVal)}
+          onChange={(e) => setValue("fecha", fromInputDate(e.target.value), { shouldValidate: true })}
+        />
         {errors.fecha && <p className="text-xs text-rose-400">{errors.fecha.message}</p>}
       </div>
 
@@ -253,12 +277,17 @@ function PrestamoForm({
 
   const moneda = watch("moneda");
   const operacion = watch("operacion");
+  const fechaVal = watch("fecha");
 
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
       <div className="space-y-1">
         <label className="text-sm font-medium">Fecha</label>
-        <Input placeholder="DD/MM/YYYY" {...register("fecha")} />
+        <Input
+          type="date"
+          value={toInputDate(fechaVal)}
+          onChange={(e) => setValue("fecha", fromInputDate(e.target.value), { shouldValidate: true })}
+        />
         {errors.fecha && <p className="text-xs text-rose-400">{errors.fecha.message}</p>}
       </div>
 
@@ -333,16 +362,22 @@ const BUSETA_FIELDS: { name: keyof BusetaInput; label: string }[] = [
 ];
 
 function BusetaForm({ onSubmit, isSubmitting }: { onSubmit: (d: BusetaInput) => Promise<void>; isSubmitting: boolean }) {
-  const { register, handleSubmit, formState: { errors } } =
+  const { register, handleSubmit, setValue, watch, formState: { errors } } =
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     useForm<BusetaInput>({ resolver: zodResolver(busetaSchema) as any, defaultValues: { fecha: todayDDMMYYYY(), buseta: "", ruta: "", pasajeros: 0, precioPasaje: 0, brutoTotal: 0, acpm: 0, basico: 0, varios: 0, montajeLlanta: 0, otros: 0, totalGastos: 0, netoTotal: 0, nota: "" } });
+
+  const fechaVal = watch("fecha");
 
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
       <div className="grid grid-cols-2 gap-3">
         <div className="space-y-1">
           <label className="text-sm font-medium">Fecha</label>
-          <Input placeholder="DD/MM/YYYY" {...register("fecha")} />
+          <Input
+            type="date"
+            value={toInputDate(fechaVal)}
+            onChange={(e) => setValue("fecha", fromInputDate(e.target.value), { shouldValidate: true })}
+          />
           {errors.fecha && <p className="text-xs text-rose-400">{errors.fecha.message}</p>}
         </div>
         <div className="space-y-1">
@@ -398,6 +433,7 @@ function PortafolioForm({ onSubmit, isSubmitting }: { onSubmit: (d: PortafolioIn
     useForm<PortafolioInput>({ resolver: zodResolver(portafolioSchema) as any, defaultValues: { etf: "GOOG", nombre: "", fechaCompra: todayDDMMYYYY(), cantidad: undefined, precioCompra: undefined, inversionInicial: undefined } });
 
   const etf = watch("etf");
+  const fechaCompraVal = watch("fechaCompra");
 
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
@@ -415,7 +451,11 @@ function PortafolioForm({ onSubmit, isSubmitting }: { onSubmit: (d: PortafolioIn
         </div>
         <div className="space-y-1">
           <label className="text-sm font-medium">Fecha compra</label>
-          <Input placeholder="DD/MM/YYYY" {...register("fechaCompra")} />
+          <Input
+            type="date"
+            value={toInputDate(fechaCompraVal)}
+            onChange={(e) => setValue("fechaCompra", fromInputDate(e.target.value), { shouldValidate: true })}
+          />
           {errors.fechaCompra && <p className="text-xs text-rose-400">{errors.fechaCompra.message}</p>}
         </div>
       </div>
