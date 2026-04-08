@@ -40,12 +40,21 @@ import { cn } from "@/lib/utils";
 import { usePagination } from "@/hooks/usePagination";
 import PaginationControls from "@/components/PaginationControls";
 import EmptyState from "@/components/EmptyState";
+import {
+  DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { FiMoreVertical, FiEdit2, FiTrash2 } from "react-icons/fi";
 
 export default function PortafolioTable({
   entries,
+  onEdit,
+  onDelete,
 }: {
   entries: InvestmentEntry[];
+  onEdit?: (e: InvestmentEntry) => void;
+  onDelete?: (e: InvestmentEntry) => void;
 }) {
+  const hasActions = Boolean(onEdit || onDelete);
   if (entries.length === 0) {
     return <EmptyState title="Sin posiciones" description="No hay entradas de portafolio registradas." />;
   }
@@ -95,6 +104,7 @@ export default function PortafolioTable({
               <TableHead className="hidden md:table-cell text-right">P. Actual</TableHead>
               <TableHead className="text-right">Valor</TableHead>
               <TableHead className="text-right">G/P</TableHead>
+              {hasActions && <TableHead className="w-8" />}
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -135,6 +145,27 @@ export default function PortafolioTable({
                 >
                   {formatPercent(e.gananciaPercent)}
                 </TableCell>
+                {hasActions && (
+                  <TableCell className="p-1">
+                    <DropdownMenu>
+                      <DropdownMenuTrigger className="flex h-7 w-7 items-center justify-center rounded hover:bg-muted text-muted-foreground hover:text-foreground transition-colors">
+                        <FiMoreVertical size={14} />
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align="end">
+                        {onEdit && (
+                          <DropdownMenuItem onSelect={() => onEdit(e)}>
+                            <FiEdit2 size={13} className="mr-2" />Editar
+                          </DropdownMenuItem>
+                        )}
+                        {onDelete && (
+                          <DropdownMenuItem variant="destructive" onSelect={() => onDelete(e)}>
+                            <FiTrash2 size={13} className="mr-2" />Eliminar
+                          </DropdownMenuItem>
+                        )}
+                      </DropdownMenuContent>
+                    </DropdownMenu>
+                  </TableCell>
+                )}
               </TableRow>
             ))}
           </TableBody>

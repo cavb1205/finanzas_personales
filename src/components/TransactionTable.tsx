@@ -14,11 +14,20 @@ import { cn } from "@/lib/utils";
 import { usePagination } from "@/hooks/usePagination";
 import PaginationControls from "@/components/PaginationControls";
 import EmptyState from "@/components/EmptyState";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { FiMoreVertical, FiEdit2, FiTrash2 } from "react-icons/fi";
 
 interface Props {
   transactions: Transaction[];
   currency: "CLP" | "COP";
   pageSize?: number;
+  onEdit?: (tx: Transaction) => void;
+  onDelete?: (tx: Transaction) => void;
 }
 
 /** Normalize category for comparison and display: lowercase + strip accents */
@@ -62,7 +71,10 @@ export default function TransactionTable({
   transactions,
   currency,
   pageSize = 15,
+  onEdit,
+  onDelete,
 }: Props) {
+  const hasActions = Boolean(onEdit || onDelete);
   const [search, setSearch] = useState("");
   const [categoryFilter, setCategoryFilter] = useState("all");
   const [monthFilter, setMonthFilter] = useState("all");
@@ -169,12 +181,13 @@ export default function TransactionTable({
               <TableHead>Descripción</TableHead>
               <TableHead className="text-right">Ingreso</TableHead>
               <TableHead className="text-right">Gasto</TableHead>
+              {hasActions && <TableHead className="w-8" />}
             </TableRow>
           </TableHeader>
           <TableBody>
             {paginated.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={5} className="py-0">
+                <TableCell colSpan={hasActions ? 6 : 5} className="py-0">
                   <EmptyState
                     title="Sin resultados"
                     description="Ninguna transacción coincide con los filtros aplicados."
@@ -211,6 +224,32 @@ export default function TransactionTable({
                   <TableCell className="text-right font-mono text-xs text-rose-400 whitespace-nowrap">
                     {t.gasto > 0 ? format(t.gasto) : ""}
                   </TableCell>
+                  {hasActions && (
+                    <TableCell className="p-1">
+                      <DropdownMenu>
+                        <DropdownMenuTrigger className="flex h-7 w-7 items-center justify-center rounded hover:bg-muted text-muted-foreground hover:text-foreground transition-colors">
+                          <FiMoreVertical size={14} />
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end">
+                          {onEdit && (
+                            <DropdownMenuItem onSelect={() => onEdit(t)}>
+                              <FiEdit2 size={13} className="mr-2" />
+                              Editar
+                            </DropdownMenuItem>
+                          )}
+                          {onDelete && (
+                            <DropdownMenuItem
+                              variant="destructive"
+                              onSelect={() => onDelete(t)}
+                            >
+                              <FiTrash2 size={13} className="mr-2" />
+                              Eliminar
+                            </DropdownMenuItem>
+                          )}
+                        </DropdownMenuContent>
+                      </DropdownMenu>
+                    </TableCell>
+                  )}
                 </TableRow>
               ))
             )}

@@ -6,8 +6,8 @@ import {
   FiDollarSign,
 } from "react-icons/fi";
 import DashboardCard from "@/components/DashboardCard";
-import TransactionTable from "@/components/TransactionTable";
 import RankingSection from "@/app/caja-chile/RankingSection";
+import CajaColombiaGrud from "./CajaColombiaGrud";
 import { getCajaColombia } from "@/lib/sheets";
 import { formatCOP } from "@/lib/format";
 // formatCOP is used server-side only (cards, remesa, investment summary)
@@ -16,7 +16,6 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import CajaColombiaCharts from "./CajaColombiaCharts";
 import AlertaGasto from "@/app/caja-chile/AlertaGasto";
 import ProyeccionCard from "@/app/caja-chile/ProyeccionCard";
-import ExportCsvButton from "@/components/ExportCsvButton";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 export const revalidate = 300;
@@ -208,15 +207,8 @@ export default async function CajaColombiaPage() {
           <RankingSection transactions={transactions} currency="COP" />
         </TabsContent>
 
-        <TabsContent value="transacciones" className="mt-6 space-y-3">
-          <div className="flex items-center justify-between">
-            <h2 className="text-lg font-semibold">Transacciones</h2>
-            <ExportCsvButton
-              transactions={transactions}
-              filename="caja-colombia"
-            />
-          </div>
-          <TransactionTable transactions={transactions} currency="COP" />
+        <TabsContent value="transacciones" className="mt-6">
+          <CajaColombiaGrud transactions={transactions} />
         </TabsContent>
       </Tabs>
     </div>

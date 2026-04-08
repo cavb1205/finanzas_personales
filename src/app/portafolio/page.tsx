@@ -4,7 +4,7 @@ import { getPortafolio } from "@/lib/sheets";
 import { formatUSD, formatPercent } from "@/lib/format";
 import { Separator } from "@/components/ui/separator";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import PortafolioTable from "./PortafolioTable";
+import PortafolioCrud from "./PortafolioCrud";
 import PortafolioCharts from "./PortafolioCharts";
 import PortafolioAssets from "./PortafolioAssets";
 import PriceHistoryChart from "./PriceHistoryChart";
@@ -74,9 +74,8 @@ export default async function PortafolioPage() {
           <PortafolioCharts entries={entries} />
           <PriceHistoryChart />
         </TabsContent>
-        <TabsContent value="posiciones" className="mt-6 space-y-3">
-          <h2 className="text-lg font-semibold">Posiciones</h2>
-          <PortafolioTable entries={entries} />
+        <TabsContent value="posiciones" className="mt-6">
+          <PortafolioCrud entries={entries} />
         </TabsContent>
       </Tabs>
     </div>

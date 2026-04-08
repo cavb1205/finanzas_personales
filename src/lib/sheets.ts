@@ -6,7 +6,7 @@ function getSheets() {
       client_email: process.env.GOOGLE_SERVICE_ACCOUNT_EMAIL,
       private_key: process.env.GOOGLE_PRIVATE_KEY?.replace(/\\n/g, "\n"),
     },
-    scopes: ["https://www.googleapis.com/auth/spreadsheets.readonly"],
+    scopes: ["https://www.googleapis.com/auth/spreadsheets"],
   });
   return google.sheets({ version: "v4", auth });
 }
@@ -31,6 +31,8 @@ export interface Transaction {
   descripcion: string;
   ingreso: number;
   gasto: number;
+  /** Row index in the sheet (1-based, matching sheets-write rowIndex param). Present when loaded for CRUD. */
+  rowIndex?: number;
 }
 
 export interface MonthlySummary {
@@ -47,6 +49,7 @@ export interface Prestamo {
   monto: number;
   moneda: string;
   observaciones: string;
+  rowIndex?: number;
 }
 
 export interface PrestamoResumen {
@@ -67,6 +70,7 @@ export interface InvestmentEntry {
   valorActual: number;
   ganancia: number;
   gananciaPercent: number;
+  rowIndex?: number;
 }
 
 export interface BusetaEntry {
@@ -84,6 +88,7 @@ export interface BusetaEntry {
   totalGastos: number;
   netoTotal: number;
   nota: string;
+  rowIndex?: number;
 }
 
 export interface BusetaDashboard {
@@ -200,7 +205,7 @@ export async function getCajaChile(): Promise<{
     const gasto = parseCLPCOP(row[4]);
 
     if (ingreso > 0 || gasto > 0 || descripcion) {
-      transactions.push({ fecha, categoria, descripcion, ingreso, gasto });
+      transactions.push({ fecha, categoria, descripcion, ingreso, gasto, rowIndex: i });
     }
   }
 
@@ -255,6 +260,7 @@ export async function getCajaColombia(): Promise<{
         descripcion: row[2] || "",
         ingreso: parseCLPCOP(row[3]),
         gasto: parseCLPCOP(row[4]),
+        rowIndex: i,
       });
     }
 
@@ -369,6 +375,7 @@ export async function getPrestamos(): Promise<{
       monto: parseCLPCOP(row[3]),
       moneda: row[4] || "COP",
       observaciones: row[5] || "",
+      rowIndex: i,
     });
   }
 
@@ -421,6 +428,7 @@ export async function getPortafolio(): Promise<{
       valorActual: parseUSD(row[7]),
       ganancia: parseUSD(row[8]),
       gananciaPercent: parsePercent(row[9]),
+      rowIndex: i,
     });
   }
 
@@ -469,6 +477,7 @@ export async function getControlBusetas(): Promise<BusetaEntry[]> {
       totalGastos: parseCLPCOP(row[13]),
       netoTotal: parseCLPCOP(row[14]),
       nota: row[15] || "",
+      rowIndex: i,
     });
   }
 

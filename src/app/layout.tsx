@@ -4,6 +4,8 @@ import { ThemeProvider } from "@/components/ThemeProvider";
 import "./globals.css";
 import { Geist } from "next/font/google";
 import { cn } from "@/lib/utils";
+import { Toaster } from "@/components/ui/sonner";
+import GlobalFab from "@/components/GlobalFab";
 
 const geist = Geist({subsets:['latin'],variable:'--font-sans'});
 
@@ -31,6 +33,8 @@ export default function RootLayout({
           <main className="min-h-screen md:ml-64">
             <div className="p-4 pt-16 md:p-8 md:pt-8">{children}</div>
           </main>
+          <GlobalFab />
+          <Toaster position="bottom-center" richColors />
         </ThemeProvider>
       </body>
     </html>

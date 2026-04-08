@@ -1,14 +1,13 @@
 import { FiDollarSign, FiTrendingUp, FiTrendingDown } from "react-icons/fi";
 import DashboardCard from "@/components/DashboardCard";
-import TransactionTable from "@/components/TransactionTable";
 import RankingSection from "./RankingSection";
+import CajaChileCrud from "./CajaChileCrud";
 import { getCajaChile } from "@/lib/sheets";
 import { formatCLP } from "@/lib/format";
 import { Separator } from "@/components/ui/separator";
 import CajaChileCharts from "./CajaChileCharts";
 import ProyeccionCard from "./ProyeccionCard";
 import AlertaGasto from "./AlertaGasto";
-import ExportCsvButton from "@/components/ExportCsvButton";
 import ComparacionMeses from "./ComparacionMeses";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
@@ -126,12 +125,8 @@ export default async function CajaChilePage() {
           <RankingSection transactions={transactions} />
         </TabsContent>
 
-        <TabsContent value="transacciones" className="mt-6 space-y-3">
-          <div className="flex items-center justify-between">
-            <h2 className="text-lg font-semibold">Transacciones</h2>
-            <ExportCsvButton transactions={transactions} filename="caja-chile" />
-          </div>
-          <TransactionTable transactions={transactions} currency="CLP" />
+        <TabsContent value="transacciones" className="mt-6">
+          <CajaChileCrud transactions={transactions} currency="CLP" />
         </TabsContent>
       </Tabs>
     </div>

@@ -8,7 +8,7 @@ import {
 } from "@/components/ui/select";
 import { Card, CardContent } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
-import BusetasTable from "./BusetasTable";
+import BusetasCrud from "./BusetasCrud";
 
 function toMonthKey(fecha: string): string {
   const sep = fecha.includes("/") ? "/" : "-";
@@ -192,7 +192,7 @@ export default function BusetasMes({ entries }: Props) {
             <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide">
               Detalle de viajes — {monthLabel(selectedMonth)}
             </h3>
-            <BusetasTable entries={filtered} />
+            <BusetasCrud entries={filtered} />
           </div>
         </>
       )}

@@ -2,7 +2,7 @@ import { FiUsers, FiAlertCircle, FiCheckCircle } from "react-icons/fi";
 import DashboardCard from "@/components/DashboardCard";
 import EmptyState from "@/components/EmptyState";
 import PrestamosDetalle from "./PrestamosDetalle";
-import HistorialPrestamos from "./HistorialPrestamos";
+import PrestamosCrud from "./PrestamosCrud";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { getPrestamos } from "@/lib/sheets";
 import { formatCOP } from "@/lib/format";
@@ -121,7 +121,7 @@ export default async function PrestamosPage() {
 
         {/* Historial completo */}
         <TabsContent value="historial" className="mt-6">
-          <HistorialPrestamos movimientos={movimientos} resumen={resumen} />
+          <PrestamosCrud movimientos={movimientos} resumen={resumen} />
         </TabsContent>
       </Tabs>
     </div>
