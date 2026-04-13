@@ -6,8 +6,7 @@ import { Select as SelectPrimitive } from "@base-ui/react/select"
 import { cn } from "@/lib/utils"
 import { ChevronDownIcon, CheckIcon, ChevronUpIcon } from "lucide-react"
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-function Select(props: any) {
+function Select(props: SelectPrimitive.Root.Props) {
   return <SelectPrimitive.Root modal={false} {...props} />
 }
 
