@@ -8,7 +8,7 @@ import BusetasCharts from "./BusetasCharts";
 import BusetasMes from "./BusetasMes";
 import EmptyState from "@/components/EmptyState";
 
-export const revalidate = 300;
+export const dynamic = "force-dynamic";
 
 export default async function BusetasPage() {
   const [entries, dashboard] = await Promise.all([

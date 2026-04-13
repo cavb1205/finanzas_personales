@@ -15,7 +15,7 @@ import {
 import MetasCharts from "./MetasCharts";
 import { cn } from "@/lib/utils";
 
-export const revalidate = 300;
+export const dynamic = "force-dynamic";
 
 function addMonths(date: Date, months: number): Date {
   const d = new Date(date);

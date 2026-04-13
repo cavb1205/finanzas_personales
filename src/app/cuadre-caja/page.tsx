@@ -8,7 +8,7 @@ import { cn } from "@/lib/utils";
 import CuadreCajaCharts from "./CuadreCajaCharts";
 import EmptyState from "@/components/EmptyState";
 
-export const revalidate = 300;
+export const dynamic = "force-dynamic";
 
 export default async function CuadreCajaPage() {
   const {

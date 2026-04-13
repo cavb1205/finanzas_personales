@@ -12,7 +12,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
 import ResumenCharts from "./ResumenCharts";
 
-export const revalidate = 300;
+export const dynamic = "force-dynamic";
 
 function KpiRow({
   label,

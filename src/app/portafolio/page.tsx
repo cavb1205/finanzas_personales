@@ -9,7 +9,7 @@ import PortafolioCharts from "./PortafolioCharts";
 import PortafolioAssets from "./PortafolioAssets";
 import PriceHistoryChart from "./PriceHistoryChart";
 
-export const revalidate = 300;
+export const dynamic = "force-dynamic";
 
 export default async function PortafolioPage() {
   const { entries, resumen } = await getPortafolio();

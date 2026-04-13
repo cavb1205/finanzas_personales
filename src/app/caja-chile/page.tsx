@@ -11,7 +11,7 @@ import AlertaGasto from "./AlertaGasto";
 import ComparacionMeses from "./ComparacionMeses";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
-export const revalidate = 300;
+export const dynamic = "force-dynamic";
 
 function deltaPct(current: number, previous: number): string | undefined {
   if (!previous || previous === 0) return undefined;
