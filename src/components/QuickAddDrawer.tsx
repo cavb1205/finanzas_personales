@@ -16,13 +16,7 @@ import {
 } from "@/components/ui/drawer";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+import { cn } from "@/lib/utils";
 import {
   FiDollarSign,
   FiGlobe,
@@ -158,12 +152,17 @@ function CajaChileForm({
 
       <div className="space-y-1">
         <label className="text-sm font-medium">Categoría</label>
-        <Select value={cat} onValueChange={(v) => setValue("categoria", v as CajaChileFormValues["categoria"], { shouldValidate: true })}>
-          <SelectTrigger className="w-full"><SelectValue /></SelectTrigger>
-          <SelectContent>
-            {CAJA_CHILE_CATEGORIES.map((c) => <SelectItem key={c} value={c}>{c}</SelectItem>)}
-          </SelectContent>
-        </Select>
+        <div className="flex rounded-md border border-input overflow-hidden">
+          {CAJA_CHILE_CATEGORIES.map((c, i) => (
+            <button key={c} type="button"
+              onClick={() => setValue("categoria", c, { shouldValidate: true })}
+              className={cn("flex-1 h-8 px-2 text-xs font-medium transition-colors",
+                i > 0 && "border-l border-input",
+                cat === c ? "bg-primary text-primary-foreground" : "bg-transparent hover:bg-muted"
+              )}
+            >{c}</button>
+          ))}
+        </div>
         {errors.categoria && <p className="text-xs text-rose-400">{errors.categoria.message}</p>}
       </div>
 
@@ -225,12 +224,17 @@ function CajaColombiaForm({
 
       <div className="space-y-1">
         <label className="text-sm font-medium">Categoría</label>
-        <Select value={cat} onValueChange={(v) => setValue("categoria", v as CajaColombiaFormValues["categoria"], { shouldValidate: true })}>
-          <SelectTrigger className="w-full"><SelectValue /></SelectTrigger>
-          <SelectContent>
-            {CAJA_COLOMBIA_CATEGORIES.map((c) => <SelectItem key={c} value={c}>{c}</SelectItem>)}
-          </SelectContent>
-        </Select>
+        <div className="flex rounded-md border border-input overflow-hidden">
+          {CAJA_COLOMBIA_CATEGORIES.map((c, i) => (
+            <button key={c} type="button"
+              onClick={() => setValue("categoria", c, { shouldValidate: true })}
+              className={cn("flex-1 h-8 px-1 text-xs font-medium transition-colors",
+                i > 0 && "border-l border-input",
+                cat === c ? "bg-primary text-primary-foreground" : "bg-transparent hover:bg-muted"
+              )}
+            >{c}</button>
+          ))}
+        </div>
         {errors.categoria && <p className="text-xs text-rose-400">{errors.categoria.message}</p>}
       </div>
 
@@ -299,12 +303,17 @@ function PrestamoForm({
 
       <div className="space-y-1">
         <label className="text-sm font-medium">Operación</label>
-        <Select value={operacion} onValueChange={(v) => { if (v) setValue("operacion", v, { shouldValidate: true }); }}>
-          <SelectTrigger className="w-full"><SelectValue /></SelectTrigger>
-          <SelectContent>
-            {OPERACIONES_PRESTAMO.map((op) => <SelectItem key={op} value={op}>{op}</SelectItem>)}
-          </SelectContent>
-        </Select>
+        <div className="flex rounded-md border border-input overflow-hidden">
+          {OPERACIONES_PRESTAMO.map((op, i) => (
+            <button key={op} type="button"
+              onClick={() => setValue("operacion", op, { shouldValidate: true })}
+              className={cn("flex-1 h-8 px-1 text-xs font-medium transition-colors",
+                i > 0 && "border-l border-input",
+                operacion === op ? "bg-primary text-primary-foreground" : "bg-transparent hover:bg-muted"
+              )}
+            >{op}</button>
+          ))}
+        </div>
         {errors.operacion && <p className="text-xs text-rose-400">{errors.operacion.message}</p>}
       </div>
 
@@ -323,12 +332,17 @@ function PrestamoForm({
         </div>
         <div className="space-y-1">
           <label className="text-sm font-medium">Moneda</label>
-          <Select value={moneda} onValueChange={(v) => setValue("moneda", v as PrestamoInput["moneda"])}>
-            <SelectTrigger className="w-full"><SelectValue /></SelectTrigger>
-            <SelectContent>
-              {MONEDAS.map((m) => <SelectItem key={m} value={m}>{m}</SelectItem>)}
-            </SelectContent>
-          </Select>
+          <div className="flex rounded-md border border-input overflow-hidden">
+            {MONEDAS.map((m, i) => (
+              <button key={m} type="button"
+                onClick={() => setValue("moneda", m)}
+                className={cn("flex-1 h-8 text-xs font-medium transition-colors",
+                  i > 0 && "border-l border-input",
+                  moneda === m ? "bg-primary text-primary-foreground" : "bg-transparent hover:bg-muted"
+                )}
+              >{m}</button>
+            ))}
+          </div>
         </div>
       </div>
 
@@ -440,13 +454,17 @@ function PortafolioForm({ onSubmit, isSubmitting }: { onSubmit: (d: PortafolioIn
       <div className="grid grid-cols-2 gap-3">
         <div className="space-y-1">
           <label className="text-sm font-medium">Activo</label>
-          <Select value={etf} onValueChange={(v) => { if (v) setValue("etf", v as PortafolioInput["etf"], { shouldValidate: true }); }}>
-            <SelectTrigger className="w-full"><SelectValue /></SelectTrigger>
-            <SelectContent>
-              <SelectItem value="GOOG">GOOG</SelectItem>
-              <SelectItem value="BTC">BTC</SelectItem>
-            </SelectContent>
-          </Select>
+          <div className="flex rounded-md border border-input overflow-hidden">
+            {(["GOOG", "BTC"] as const).map((v, i) => (
+              <button key={v} type="button"
+                onClick={() => setValue("etf", v, { shouldValidate: true })}
+                className={cn("flex-1 h-8 text-xs font-medium transition-colors",
+                  i > 0 && "border-l border-input",
+                  etf === v ? "bg-primary text-primary-foreground" : "bg-transparent hover:bg-muted"
+                )}
+              >{v}</button>
+            ))}
+          </div>
           {errors.etf && <p className="text-xs text-rose-400">{errors.etf.message}</p>}
         </div>
         <div className="space-y-1">

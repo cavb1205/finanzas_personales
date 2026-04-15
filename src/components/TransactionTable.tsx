@@ -232,7 +232,7 @@ export default function TransactionTable({
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end">
                           {onEdit && (
-                            <DropdownMenuItem onSelect={() => onEdit(t)}>
+                            <DropdownMenuItem onClick={() => onEdit(t)}>
                               <FiEdit2 size={13} className="mr-2" />
                               Editar
                             </DropdownMenuItem>
@@ -240,7 +240,7 @@ export default function TransactionTable({
                           {onDelete && (
                             <DropdownMenuItem
                               variant="destructive"
-                              onSelect={() => onDelete(t)}
+                              onClick={() => onDelete(t)}
                             >
                               <FiTrash2 size={13} className="mr-2" />
                               Eliminar

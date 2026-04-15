@@ -41,7 +41,7 @@ interface Props {
 const API = "/api/transactions/prestamos";
 
 function prestamoFingerprint(m: Prestamo): string {
-  return rowFingerprint([
+  return rowFingerprint(m.rawRow ?? [
     m.fecha,
     m.persona,
     m.operacion,
@@ -182,11 +182,11 @@ export default function PrestamosCrud({ movimientos, resumen }: Props) {
                           <FiMoreVertical size={14} />
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end">
-                          <DropdownMenuItem onSelect={() => handleEdit(m)}>
+                          <DropdownMenuItem onClick={() => handleEdit(m)}>
                             <FiEdit2 size={13} className="mr-2" />
                             Editar
                           </DropdownMenuItem>
-                          <DropdownMenuItem variant="destructive" onSelect={() => setDeleteRow(m)}>
+                          <DropdownMenuItem variant="destructive" onClick={() => setDeleteRow(m)}>
                             <FiTrash2 size={13} className="mr-2" />
                             Eliminar
                           </DropdownMenuItem>
@@ -208,7 +208,7 @@ export default function PrestamosCrud({ movimientos, resumen }: Props) {
         onSuccess={() => router.refresh()}
       />
 
-      <Dialog open={Boolean(deleteRow)} onOpenChange={(open) => { if (!open) setDeleteRow(undefined); }}>
+      <Dialog open={Boolean(deleteRow)} onOpenChange={(open) => { if (!open) setDeleteRow(undefined); }} disablePointerDismissal>
         <DialogContent showCloseButton={false}>
           <DialogHeader>
             <DialogTitle>Eliminar movimiento</DialogTitle>

@@ -5,24 +5,18 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { toast } from "sonner";
-import { cajaTransactionSchema, type CajaTransactionInput } from "@/lib/schemas";
+import { type CajaTransactionInput } from "@/lib/schemas";
 import { rowFingerprint } from "@/lib/utils";
 import {
-  Drawer,
-  DrawerContent,
-  DrawerHeader,
-  DrawerTitle,
-  DrawerFooter,
-} from "@/components/ui/drawer";
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+import { cn } from "@/lib/utils";
 import type { Transaction } from "@/lib/sheets";
 
 interface TransactionRow extends Transaction {
@@ -43,7 +37,6 @@ const CATEGORIES = ["Ingreso", "Gasto", "Préstamo", "Inversión"] as const;
 /** Categories that go to the "ingreso" column; the rest go to "gasto" */
 const INGRESO_CATS = new Set(["Ingreso", "Inversión"]);
 
-/** Internal form shape: single "monto" field instead of ingreso+gasto */
 const formSchema = z.object({
   fecha: z.string().min(1),
   categoria: z.enum(["Ingreso", "Gasto", "Préstamo", "Inversión"]),
@@ -61,7 +54,10 @@ function todayDDMMYYYY(): string {
 }
 
 function toInputDate(ddmmyyyy: string): string {
-  const [dd, mm, yyyy] = ddmmyyyy.split("/");
+  const parts = ddmmyyyy.split("/");
+  const dd = parts[0];
+  const mm = parts[1];
+  const yyyy = parts[2];
   if (!dd || !mm || !yyyy) return "";
   return `${yyyy}-${mm}-${dd}`;
 }
@@ -72,7 +68,6 @@ function fromInputDate(yyyymmdd: string): string {
   return `${dd}/${mm}/${yyyy}`;
 }
 
-/** Map a Transaction row (ingreso/gasto columns) to our single-monto form */
 function txToForm(tx: Transaction): FormValues {
   return {
     fecha: tx.fecha,
@@ -82,7 +77,6 @@ function txToForm(tx: Transaction): FormValues {
   };
 }
 
-/** Map form values back to the API payload shape (ingreso + gasto) */
 function formToCajaPayload(data: FormValues): CajaTransactionInput {
   const isIngreso = INGRESO_CATS.has(data.categoria);
   return {
@@ -179,22 +173,28 @@ export default function TransactionDrawer({
   }
 
   return (
-    <Drawer open={open} onOpenChange={onOpenChange}>
-      <DrawerContent>
-        <DrawerHeader>
-          <DrawerTitle>
+    <Dialog open={open} onOpenChange={onOpenChange} disablePointerDismissal>
+      <DialogContent className="w-[calc(100%-2rem)] sm:w-105" showCloseButton>
+        <DialogHeader>
+          <DialogTitle>
             {isEdit ? "Editar transacción" : "Nueva transacción"}
-          </DrawerTitle>
-        </DrawerHeader>
+          </DialogTitle>
+        </DialogHeader>
 
-        <form onSubmit={handleSubmit(onSubmit)} className="px-4 space-y-4 overflow-y-auto">
+        <form
+          id="transaction-form"
+          onSubmit={handleSubmit(onSubmit)}
+          className="space-y-4 overflow-y-auto max-h-[60svh] px-0.5"
+        >
           {/* Fecha */}
           <div className="space-y-1">
             <label className="text-sm font-medium">Fecha</label>
             <Input
               type="date"
               value={toInputDate(fechaValue)}
-              onChange={(e) => setValue("fecha", fromInputDate(e.target.value), { shouldValidate: true })}
+              onChange={(e) =>
+                setValue("fecha", fromInputDate(e.target.value), { shouldValidate: true })
+              }
             />
             {errors.fecha && (
               <p className="text-xs text-rose-400">{errors.fecha.message}</p>
@@ -204,21 +204,24 @@ export default function TransactionDrawer({
           {/* Categoría */}
           <div className="space-y-1">
             <label className="text-sm font-medium">Categoría</label>
-            <Select
-              value={categoriaValue}
-              onValueChange={(v) =>
-                setValue("categoria", v as FormValues["categoria"], { shouldValidate: true })
-              }
-            >
-              <SelectTrigger className="w-full">
-                <SelectValue placeholder="Seleccionar categoría" />
-              </SelectTrigger>
-              <SelectContent>
-                {CATEGORIES.map((c) => (
-                  <SelectItem key={c} value={c}>{c}</SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+            <div className="flex rounded-md border border-input overflow-hidden">
+              {CATEGORIES.map((c, i) => (
+                <button
+                  key={c}
+                  type="button"
+                  onClick={() => setValue("categoria", c, { shouldValidate: true })}
+                  className={cn(
+                    "flex-1 h-8 px-2 text-xs font-medium transition-colors",
+                    i > 0 && "border-l border-input",
+                    categoriaValue === c
+                      ? "bg-primary text-primary-foreground"
+                      : "bg-transparent hover:bg-muted"
+                  )}
+                >
+                  {c}
+                </button>
+              ))}
+            </div>
             {errors.categoria && (
               <p className="text-xs text-rose-400">{errors.categoria.message}</p>
             )}
@@ -233,11 +236,9 @@ export default function TransactionDrawer({
             )}
           </div>
 
-          {/* Monto único */}
+          {/* Monto */}
           <div className="space-y-1">
-            <label className="text-sm font-medium">
-              Monto ({currencyLabel})
-            </label>
+            <label className="text-sm font-medium">Monto ({currencyLabel})</label>
             <Input
               type="number"
               inputMode="numeric"
@@ -252,20 +253,23 @@ export default function TransactionDrawer({
           </div>
         </form>
 
-        <DrawerFooter>
-          <Button onClick={handleSubmit(onSubmit)} disabled={isSubmitting} className="w-full">
-            {isSubmitting ? "Guardando..." : isEdit ? "Guardar cambios" : "Agregar transacción"}
-          </Button>
+        <DialogFooter>
           <Button
             variant="outline"
             onClick={() => onOpenChange(false)}
             disabled={isSubmitting}
-            className="w-full"
           >
             Cancelar
           </Button>
-        </DrawerFooter>
-      </DrawerContent>
-    </Drawer>
+          <Button
+            type="submit"
+            form="transaction-form"
+            disabled={isSubmitting}
+          >
+            {isSubmitting ? "Guardando..." : isEdit ? "Guardar cambios" : "Agregar"}
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
   );
 }

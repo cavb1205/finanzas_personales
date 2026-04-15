@@ -30,7 +30,7 @@ interface Props {
 const API = "/api/transactions/busetas";
 
 function entryFingerprint(e: BusetaEntry): string {
-  return rowFingerprint([
+  return rowFingerprint(e.rawRow ?? [
     e.fecha, e.buseta, e.ruta, "", "",
     String(e.pasajeros), String(e.precioPasaje), String(e.brutoTotal),
     String(e.acpm), String(e.basico), String(e.varios),
@@ -118,10 +118,10 @@ export default function BusetasCrud({ entries }: Props) {
                       <FiMoreVertical size={14} />
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end">
-                      <DropdownMenuItem onSelect={() => handleEdit(e)}>
+                      <DropdownMenuItem onClick={() => handleEdit(e)}>
                         <FiEdit2 size={13} className="mr-2" />Editar
                       </DropdownMenuItem>
-                      <DropdownMenuItem variant="destructive" onSelect={() => setDeleteRow(e)}>
+                      <DropdownMenuItem variant="destructive" onClick={() => setDeleteRow(e)}>
                         <FiTrash2 size={13} className="mr-2" />Eliminar
                       </DropdownMenuItem>
                     </DropdownMenuContent>
@@ -137,7 +137,7 @@ export default function BusetasCrud({ entries }: Props) {
 
       <BusetaDrawer open={drawerOpen} onOpenChange={handleDrawerClose} editRow={editRow} onSuccess={() => router.refresh()} />
 
-      <Dialog open={Boolean(deleteRow)} onOpenChange={(open) => { if (!open) setDeleteRow(undefined); }}>
+      <Dialog open={Boolean(deleteRow)} onOpenChange={(open) => { if (!open) setDeleteRow(undefined); }} disablePointerDismissal>
         <DialogContent showCloseButton={false}>
           <DialogHeader>
             <DialogTitle>Eliminar registro</DialogTitle>

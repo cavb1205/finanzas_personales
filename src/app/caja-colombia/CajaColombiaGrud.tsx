@@ -25,7 +25,7 @@ interface Props {
 const API = "/api/transactions/caja-colombia";
 
 function txFingerprint(t: Transaction): string {
-  return rowFingerprint([
+  return rowFingerprint(t.rawRow ?? [
     t.fecha,
     t.categoria,
     t.descripcion,
@@ -100,7 +100,7 @@ export default function CajaColombiaGrud({ transactions }: Props) {
         onSuccess={() => router.refresh()}
       />
 
-      <Dialog open={Boolean(deleteTx)} onOpenChange={(open) => { if (!open) setDeleteTx(undefined); }}>
+      <Dialog open={Boolean(deleteTx)} onOpenChange={(open) => { if (!open) setDeleteTx(undefined); }} disablePointerDismissal>
         <DialogContent showCloseButton={false}>
           <DialogHeader>
             <DialogTitle>Eliminar transacción</DialogTitle>

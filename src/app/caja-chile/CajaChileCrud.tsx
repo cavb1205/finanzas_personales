@@ -26,7 +26,7 @@ interface Props {
 const API = "/api/transactions/caja-chile";
 
 function txFingerprint(t: Transaction): string {
-  return rowFingerprint([
+  return rowFingerprint(t.rawRow ?? [
     t.fecha,
     t.categoria,
     t.descripcion,
@@ -102,7 +102,7 @@ export default function CajaChileCrud({ transactions, currency }: Props) {
       />
 
       {/* Delete confirmation dialog */}
-      <Dialog open={Boolean(deleteTx)} onOpenChange={(open) => { if (!open) setDeleteTx(undefined); }}>
+      <Dialog open={Boolean(deleteTx)} onOpenChange={(open) => { if (!open) setDeleteTx(undefined); }} disablePointerDismissal>
         <DialogContent showCloseButton={false}>
           <DialogHeader>
             <DialogTitle>Eliminar transacción</DialogTitle>

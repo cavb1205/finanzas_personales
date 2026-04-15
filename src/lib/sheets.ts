@@ -33,6 +33,8 @@ export interface Transaction {
   gasto: number;
   /** Row index in the sheet (1-based, matching sheets-write rowIndex param). Present when loaded for CRUD. */
   rowIndex?: number;
+  /** Raw string values from the sheet row, used for fingerprinting. Present when loaded for CRUD. */
+  rawRow?: string[];
 }
 
 export interface MonthlySummary {
@@ -50,6 +52,7 @@ export interface Prestamo {
   moneda: string;
   observaciones: string;
   rowIndex?: number;
+  rawRow?: string[];
 }
 
 export interface PrestamoResumen {
@@ -71,6 +74,7 @@ export interface InvestmentEntry {
   ganancia: number;
   gananciaPercent: number;
   rowIndex?: number;
+  rawRow?: string[];
 }
 
 export interface BusetaEntry {
@@ -89,6 +93,7 @@ export interface BusetaEntry {
   netoTotal: number;
   nota: string;
   rowIndex?: number;
+  rawRow?: string[];
 }
 
 export interface BusetaDashboard {
@@ -199,13 +204,16 @@ export async function getCajaChile(): Promise<{
     if (!row[0]) continue;
 
     const fecha = row[0] || "";
-    const categoria = (row[1] || "").toLowerCase();
+    const categoria = row[1] || "";
     const descripcion = row[2] || "";
     const ingreso = parseCLPCOP(row[3]);
     const gasto = parseCLPCOP(row[4]);
 
     if (ingreso > 0 || gasto > 0 || descripcion) {
-      transactions.push({ fecha, categoria, descripcion, ingreso, gasto, rowIndex: i });
+      transactions.push({
+        fecha, categoria, descripcion, ingreso, gasto, rowIndex: i,
+        rawRow: row.map((v) => v ?? ""),
+      });
     }
   }
 
@@ -261,6 +269,7 @@ export async function getCajaColombia(): Promise<{
         ingreso: parseCLPCOP(row[3]),
         gasto: parseCLPCOP(row[4]),
         rowIndex: i,
+        rawRow: row.map((v) => v ?? ""),
       });
     }
 
@@ -376,6 +385,7 @@ export async function getPrestamos(): Promise<{
       moneda: row[4] || "COP",
       observaciones: row[5] || "",
       rowIndex: i,
+      rawRow: row.map((v) => v ?? ""),
     });
   }
 
@@ -429,6 +439,7 @@ export async function getPortafolio(): Promise<{
       ganancia: parseUSD(row[8]),
       gananciaPercent: parsePercent(row[9]),
       rowIndex: i,
+      rawRow: row.map((v) => v ?? ""),
     });
   }
 
@@ -478,6 +489,7 @@ export async function getControlBusetas(): Promise<BusetaEntry[]> {
       netoTotal: parseCLPCOP(row[14]),
       nota: row[15] || "",
       rowIndex: i,
+      rawRow: row.map((v) => v ?? ""),
     });
   }
 

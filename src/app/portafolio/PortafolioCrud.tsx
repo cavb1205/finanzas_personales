@@ -20,7 +20,7 @@ interface Props {
 const API = "/api/transactions/portafolio";
 
 function entryFingerprint(e: InvestmentEntry): string {
-  return rowFingerprint([
+  return rowFingerprint(e.rawRow ?? [
     e.etf, e.nombre, e.fechaCompra,
     String(e.cantidad), String(e.precioCompra), String(e.inversionInicial),
   ]);
@@ -84,7 +84,7 @@ export default function PortafolioCrud({ entries }: Props) {
         onSuccess={() => router.refresh()}
       />
 
-      <Dialog open={Boolean(deleteRow)} onOpenChange={(open) => { if (!open) setDeleteRow(undefined); }}>
+      <Dialog open={Boolean(deleteRow)} onOpenChange={(open) => { if (!open) setDeleteRow(undefined); }} disablePointerDismissal>
         <DialogContent showCloseButton={false}>
           <DialogHeader>
             <DialogTitle>Eliminar posición</DialogTitle>

@@ -153,12 +153,12 @@ export default function PortafolioTable({
                       </DropdownMenuTrigger>
                       <DropdownMenuContent align="end">
                         {onEdit && (
-                          <DropdownMenuItem onSelect={() => onEdit(e)}>
+                          <DropdownMenuItem onClick={() => onEdit(e)}>
                             <FiEdit2 size={13} className="mr-2" />Editar
                           </DropdownMenuItem>
                         )}
                         {onDelete && (
-                          <DropdownMenuItem variant="destructive" onSelect={() => onDelete(e)}>
+                          <DropdownMenuItem variant="destructive" onClick={() => onDelete(e)}>
                             <FiTrash2 size={13} className="mr-2" />Eliminar
                           </DropdownMenuItem>
                         )}
